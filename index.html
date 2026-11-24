@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>محلات نبيل عبد العال | مع محلات نبيل عبد العال عمرك ما هتنام جعان</title>
+<style>
+  :root {
+    --bg: #eae4d7;
+    --card: #fbf9f4;
+    --text: #18181b;
+    --muted: #52525b;
+    --navy: #0b2447;
+    --navy-deep: #06152b;
+    --royal: #19376d;
+    --accent: #d97706;
+    --accent-bright: #f59e0b;
+    --gold-soft: #fef3c7;
+    --border: #d8d0c0;
+    --danger: #dc2626;
+    --ok: #15803d;
+  }
+  * { box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 92px; }
+
+  header {
+    background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 55%, var(--royal) 100%);
+    color: #ffffff;
+    padding: 18px 16px 20px;
+    border-bottom: 3px solid var(--accent-bright);
+    box-shadow: 0 6px 18px rgba(6, 21, 43, 0.18);
+  }
+  .header-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    background: rgba(245, 158, 11, 0.16);
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    color: #fde68a;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .brand { font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: -0.2px; }
+  .slogan { font-size: 13px; color: #dbeafe; }
+
+  .container { max-width: 920px; margin: 0 auto; padding: 14px; }
+
+  /* بنر الشعار الدائم المميز */
+  .promo-banner {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(125deg, var(--navy-deep) 0%, var(--navy) 58%, #1e3a8a 100%);
+    color: #ffffff;
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    box-shadow: 0 10px 24px rgba(11, 36, 71, 0.22);
+  }
+  .promo-banner::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.28) 0%, rgba(245, 158, 11, 0) 70%);
+    pointer-events: none;
+  }
+  .promo-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .promo-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    color: #06152b;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 4px 12px;
+    border-radius: 999px;
+    box-shadow: 0 3px 10px rgba(217, 119, 6, 0.35);
+  }
+  .promo-sub-pill {
+    font-size: 11.5px;
+    color: #fde68a;
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .promo-text {
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.55;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+  .promo-highlight { color: #fcd34d; }
+
+  /* بنر متحرك للعروض اليومية */
+  .daily-ticker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(90deg, #78350f 0%, #b45309 50%, #78350f 100%);
+    color: #fffbeb;
+    border: 1px solid #fbbf24;
+    border-radius: 14px;
+    padding: 9px 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(180, 83, 9, 0.2);
+  }
+  .ticker-badge {
+    flex-shrink: 0;
+    background: var(--navy-deep);
+    color: #fcd34d;
+    border: 1px solid rgba(252, 211, 77, 0.45);
+    font-size: 11.5px;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .ticker-viewport {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 13px;
+    font-weight: 800;
+    animation: dailyMarquee 18s linear infinite;
+  }
+  .daily-ticker:hover .ticker-track { animation-play-state: paused; }
+  @keyframes dailyMarquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(50%); }
+  }
+
+  .features { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
+  @media (min-width: 680px) { .features { grid-template-columns: repeat(3, 1fr); } }
+  .feat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-right: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(11, 36, 71, 0.05);
+  }
+  .feat-title { font-weight: 800; font-size: 14.5px; color: var(--navy); margin-bottom: 3px; }
+  .feat-sub { font-size: 12.5px; color: var(--muted); }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(11, 36, 71, 0.05);
+  }
+  input, select, textarea, button {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(11, 36, 71, 0.14);
+  }
+  button { cursor: pointer; font-weight: 700; transition: transform .08s ease, background-color .15s ease; }
+  button:active { transform: scale(0.98); }
+  .btn-primary { background: var(--navy); color: #fff; border: none; }
+  .btn-primary:hover { background: var(--navy-deep); }
+  .btn-accent { background: linear-gradient(135deg, var(--accent-bright), var(--accent)); color: #06152b; border: none; font-weight: 900; }
+  .btn-outline { background: #f3eee4; color: var(--navy); border-color: #cfc6b4; }
+  .btn-danger-soft { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+  .meta-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: var(--muted); gap: 8px; flex-wrap: wrap; }
+  .cats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; }
+  .cat-btn {
+    width: auto; white-space: nowrap; padding: 8px 15px; border-radius: 999px;
+    border: 1px solid #cfc6b4; background: var(--card); color: var(--navy); font-size: 13px;
+  }
+  .cat-btn.active {
+    background: var(--navy); color: #ffffff; border-color: var(--navy);
+    box-shadow: 0 4px 10px rgba(11, 36, 71, 0.22);
+  }
+
+  .section-title {
+    margin: 0 0 12px; font-size: 18px; color: var(--navy); font-weight: 800;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: ""; width: 5px; height: 20px; border-radius: 99px; background: var(--accent-bright); display: inline-block;
+  }
+
+  .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+  @media (min-width: 680px) { .products-grid { grid-template-columns: repeat(4, 1fr); } }
+  .p-card {
+    background: #ffffff; border: 1px solid var(--border); border-radius: 14px; padding: 10px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(11, 36, 71, 0.05);
+  }
+  .p-img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 11px;
+    background: linear-gradient(145deg, #e7e5de, #f8f7f4);
+    display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--muted); overflow: hidden;
+  }
+  .p-img img { width: 100%; height: 100%; object-fit: cover; }
+  .p-name { font-weight: 800; font-size: 14px; color: var(--text); margin-top: 8px; }
+  .p-cat {
+    font-size: 11.5px; color: var(--navy); background: var(--gold-soft); border: 1px solid #fde68a;
+    border-radius: 6px; padding: 2px 7px; width: fit-content; margin-top: 4px; font-weight: 700;
+  }
+  .p-price { font-weight: 900; color: var(--navy); font-size: 15.5px; margin: 7px 0 8px; }
+  .qty-box { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #f3eee4; padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
+  .qty-btn { width: 32px; height: 32px; padding: 0; border-radius: 8px; font-size: 18px; line-height: 1; }
+  .qty-val { font-weight: 800; font-size: 14px; color: var(--navy); }
+
+  .cart-fab {
+    position: fixed; bottom: 18px; left: 16px; width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 100%);
+    color: #fff; border: 2px solid rgba(251, 191, 36, 0.55);
+    box-shadow: 0 10px 24px rgba(6, 21, 43, 0.35);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; z-index: 40;
+  }
+  .cart-badge {
+    position: absolute; top: -4px; right: -4px; background: var(--accent-bright); color: #06152b;
+    font-size: 12px; font-weight: 900; min-width: 23px; height: 23px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center; padding: 0 5px;
+    border: 2px solid #fff;
+  }
+  .support-fab {
+    position: fixed; bottom: 18px; right: 16px; width: auto; padding: 11px 15px; border-radius: 999px;
+    background: var(--card); color: var(--navy); border: 1px solid #cfc6b4;
+    box-shadow: 0 8px 20px rgba(11, 36, 71, 0.14); font-size: 13px; z-index: 40;
+  }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(6, 21, 43, 0.58); display: none;
+    align-items: flex-end; justify-content: center; z-index: 60;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-sheet {
+    background: var(--card); width: 100%; max-width: 620px; max-height: 88vh; overflow-y: auto;
+    border-radius: 20px 20px 0 0; padding: 16px; border-top: 4px solid var(--accent-bright);
+  }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .modal-head h3 { margin: 0; font-size: 17px; color: var(--navy); }
+  .close-btn { width: auto; padding: 6px 12px; border-radius: 8px; background: #e8e2d5; color: var(--navy); border: none; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 8px; }
+  .status-msg { font-size: 13px; margin-top: 8px; color: var(--muted); }
+  .order-box { background: #f3eee4; border: 1px solid var(--border); border-right: 4px solid var(--navy); border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 13px; }
+  .error-banner { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; border-radius: 10px; padding: 10px; font-size: 13px; margin-bottom: 10px; display: none; }
+
+  /* شارات حالة الطلب البارزة للعميل */
+  .status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    margin-right: 4px;
+  }
+  .st-prep { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+  .st-delivery { background: #dbeafe; color: #1e3a8a; border: 1px solid #3b82f6; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22); }
+  .st-done { background: #dcfce7; color: #166534; border: 1px solid #22c55e; }
+  .st-cancel { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+  .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .order-actions button { width: auto; flex: 1; min-width: 120px; padding: 9px 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <span class="brand-badge">★ سوبر ماركت متكامل • توصيل سريع</span>
+    <div class="brand">محلات نبيل عبد العال</div>
+    <div class="slogan">مع محلات نبيل عبد العال عمرك ما هتنام جعان</div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="promo-banner" aria-label="شعارنا الدائم">
+    <div class="promo-top">
+      <span class="promo-tag">✦ شعارنا الدائم</span>
+      <span class="promo-sub-pill">عروضنا مستمرة يومياً</span>
+    </div>
+    <div class="promo-text">
+      <span class="promo-highlight">مع محلات نبيل عبد العال</span> عمرك ما هتنام جعان
+    </div>
+  </section>
+
+  <!-- بنر متحرك للعروض اليومية -->
+  <section class="daily-ticker" aria-label="العروض اليومية">
+    <span class="ticker-badge">🔥 عروض اليوم</span>
+    <div class="ticker-viewport">
+      <div id="dailyOffersTrack" class="ticker-track">
+        <span>عروض يومية متجددة في محلات نبيل عبد العال • أسعار مميزة على السلع الأساسية والزيوت والسمنات</span>
+        <span>عروض يومية متجددة في محلات نبيل عبد العال • أسعار مميزة على السلع الأساسية والزيوت والسمنات</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feat-card">
+      <div class="feat-title">🛒 تشكيلة سوبر ماركت متكاملة</div>
+      <div class="feat-sub">سلع يومية، زيوت، سمن، معلبات، منظفات وألبان</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-title">⚡ تحديث فوري للمنتجات</div>
+      <div class="feat-sub">أي منتج أو سعر يُضاف أو يُعدّل يظهر للعملاء مباشرة</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-title">🚚 تتبع الطلب لحظة بلحظة</div>
+      <div class="feat-sub">قيد التجهيز • قيد التوصيل • تم التسليم</div>
+    </div>
+  </section>
+
+  <div id="dbErrorBanner" class="error-banner"></div>
+
+  <section class="panel">
+    <input id="searchInput" type="search" placeholder="ابحث عن منتج بالاسم أو الوصف (مثال: أرز، زيت)" />
+    <div class="meta-row">
+      <span id="productsCount" style="font-weight:700;color:var(--navy);">عدد المنتجات: 0</span>
+      <button id="refreshProductsBtn" type="button" class="btn-outline" style="width:auto;padding:6px 12px;font-size:12px;">تحديث الآن</button>
+    </div>
+  </section>
+
+  <div id="categoriesBar" class="cats"></div>
+
+  <section class="panel">
+    <h2 class="section-title">جميع المنتجات</h2>
+    <div id="productsGrid" class="products-grid"></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title" style="margin-bottom:6px;">📦 متابعة طلبك بنفسك</h2>
+    <p style="margin:0 0 10px;font-size:13px;color:var(--muted);">
+      أدخل رقم الطلب (مثال: ORD-1001) أو رقم الهاتف المسجل في الطلب لمعرفة الحالة الفورية أو تعديل/إلغاء الطلب قبل بدء التوصيل.
+    </p>
+    <div style="display:flex;gap:8px;">
+      <input id="trackInput" type="text" placeholder="رقم الطلب أو رقم الموبايل..." />
+      <button id="trackBtn" type="button" class="btn-primary" style="width:auto;padding:10px 18px;">بحث</button>
+    </div>
+    <div id="trackResult"></div>
+  </section>
+</main>
+
+<button id="cartFab" type="button" class="cart-fab" aria-label="السلة">
+  🛒
+  <span id="cartBadge" class="cart-badge">0</span>
+</button>
+
+<button id="supportFab" type="button" class="support-fab">💬 شكاوى واستفسار</button>
+
+<!-- نافذة السلة وإتمام الطلب -->
+<div id="cartModal" class="modal-backdrop">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>سلة المشتريات</h3>
+      <button type="button" class="close-btn" data-close="cartModal">إغلاق</button>
+    </div>
+    <div id="cartItems"></div>
+    <div id="cartTotal" style="font-weight:800;font-size:16px;color:var(--navy);margin:12px 0;">الإجمالي: 0 جنيه</div>
+    <form id="orderForm" style="display:grid;gap:10px;">
+      <input id="custName" type="text" placeholder="الاسم بالكامل" required />
+      <input id="custPhone" type="tel" placeholder="رقم الموبايل" required />
+      <input id="custAddress" type="text" placeholder="العنوان بالتفصيل" required />
+      <textarea id="custNotes" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+      <button type="submit" class="btn-accent">تأكيد الطلب</button>
+    </form>
+    <div id="orderStatus" class="status-msg"></div>
+  </div>
+</div>
+
+<!-- نافذة تعديل الطلب للعميل -->
+<div id="editOrderModal" class="modal-backdrop">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>تعديل الطلب <span id="editOrderCodeLabel" style="font-size:13px;color:var(--muted);"></span></h3>
+      <button type="button" class="close-btn" data-close="editOrderModal">إغلاق</button>
+    </div>
+    <div id="editOrderItems"></div>
+    <div id="editOrderTotal" style="font-weight:800;font-size:16px;color:var(--navy);margin:12px 0;">الإجمالي الجديد: 0 جنيه</div>
+    <button id="saveEditedOrderBtn" type="button" class="btn-accent">حفظ التعديلات</button>
+    <div id="editOrderStatus" class="status-msg"></div>
+  </div>
+</div>
+
+<!-- نافذة الشكاوى والاستفسار -->
+<div id="supportModal" class="modal-backdrop">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>شكاوى واستفسار</h3>
+      <button type="button" class="close-btn" data-close="supportModal">إغلاق</button>
+    </div>
+    <form id="supportForm" style="display:grid;gap:10px;">
+      <input id="supName" type="text" placeholder="الاسم" required />
+      <input id="supPhone" type="tel" placeholder="رقم الموبايل" required />
+      <textarea id="supMsg" rows="3" placeholder="اكتب شكواك أو استفسارك..." required></textarea>
+      <button type="submit" class="btn-primary">إرسال</button>
+    </form>
+    <div id="supportStatus" class="status-msg"></div>
+  </div>
+</div>
+
+<script>
+const DB_URL = "https://nabil-store-35485-default-rtdb.firebaseio.com";
+const DEFAULT_CATEGORIES = [
+  "الكل",
+  "السلع الاساسيه",
+  "الزيوت والسمنات",
+  "معلبات",
+  "منظفات",
+  "ألبان"
+];
+
+let state = {
+  products: [],
+  customCategories: [],
+  dailyOffers: [],
+  selectedCategory: "الكل",
+  searchQuery: "",
+  cart: loadCart(),
+  trackedOrders: [],
+  editingOrderId: null,
+  editingItems: []
+};
+
+function loadCart() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("nabil_store_cart_v1") || "{}");
+    return typeof raw === "object" && raw !== null ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveCart() {
+  localStorage.setItem("nabil_store_cart_v1", JSON.stringify(state.cart));
+  updateCartBadge();
+}
+
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getStatusBadgeHtml(statusText) {
+  const st = String(statusText || "قيد التجهيز").trim();
+  if (st.includes("توصيل") || st.includes("تسليم")) {
+    return `<span class="status-pill st-delivery">🚚 ${escapeHtml(st)}</span>`;
+  }
+  if (st.includes("تم")) {
+    return `<span class="status-pill st-done">✓ ${escapeHtml(st)}</span>`;
+  }
+  if (st.includes("ملغ")) {
+    return `<span class="status-pill st-cancel">✕ ${escapeHtml(st)}</span>`;
+  }
+  return `<span class="status-pill st-prep">⏳ ${escapeHtml(st)}</span>`;
+}
+
+function canCustomerModifyOrder(statusText) {
+  const st = String(statusText || "قيد التجهيز").trim();
+  if (st.includes("ملغ") || st.includes("توصيل") || st.includes("تسليم") || st.includes("تم")) {
+    return false;
+  }
+  return true;
+}
+
+function normalizeProduct(id, raw) {
+  if (!raw || typeof raw !== "object") return null;
+  if (raw.deleted === true || raw.isDeleted === true) return null;
+  const name = String(raw.name ?? raw.title ?? raw.productName ?? "").trim();
+  if (!name) return null;
+  const priceNum = Number(raw.price ?? raw.unitPrice ?? 0);
+  const price = Number.isFinite(priceNum) && priceNum >= 0 ? priceNum : 0;
+  const category = String(raw.category ?? raw.cat ?? "السلع الاساسيه").trim() || "السلع الاساسيه";
+  const description = String(raw.description ?? raw.desc ?? raw.notes ?? "").trim();
+  const image = String(raw.image ?? raw.img ?? raw.imageUrl ?? raw.photo ?? "").trim();
+  const active = raw.active === false || raw.available === false || raw.hidden === true ? false : true;
+  if (!active) return null;
+  return {
+    id: String(raw.id ?? id),
+    name,
+    price,
+    category,
+    description,
+    image
+  };
+}
+
+function extractProductsList(payload) {
+  if (!payload) return [];
+  const items = [];
+  if (Array.isArray(payload)) {
+    payload.forEach((val, idx) => {
+      if (val && typeof val === "object") {
+        const p = normalizeProduct(val.id ?? idx, val);
+        if (p) items.push(p);
+      }
+    });
+    return items;
+  }
+  if (typeof payload === "object") {
+    const candidateCollections = [];
+    if (payload.products && typeof payload.products === "object") candidateCollections.push(payload.products);
+    if (payload.items && typeof payload.items === "object") candidateCollections.push(payload.items);
+
+    const directEntries = Object.entries(payload).filter(([k, v]) =>
+      k !== "orders" && k !== "complaints" && k !== "tickets" && k !== "support" && k !== "meta" && k !== "settings" && k !== "categories" && k !== "offers" && v && typeof v === "object"
+    );
+    if (candidateCollections.length === 0 && directEntries.length > 0) {
+      const sample = directEntries[0][1];
+      if (sample && ("name" in sample || "title" in sample || "price" in sample)) {
+        candidateCollections.push(Object.fromEntries(directEntries));
+      }
+    }
+
+    for (const col of candidateCollections) {
+      if (Array.isArray(col)) {
+        col.forEach((val, idx) => {
+          const p = normalizeProduct(val?.id ?? idx, val);
+          if (p) items.push(p);
+        });
+      } else {
+        Object.entries(col).forEach(([key, val]) => {
+          if (val && typeof val === "object") {
+            const p = normalizeProduct(key, val);
+            if (p) items.push(p);
+          }
+        });
+      }
+    }
+  }
+  return items;
+}
+
+async function fetchJson(path) {
+  const sep = path.includes("?") ? "&" : "?";
+  const url = `${DB_URL}${path}${sep}_t=${Date.now()}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+function renderDailyOffersTicker() {
+  const track = document.getElementById("dailyOffersTrack");
+  const texts = state.dailyOffers.length > 0
+    ? state.dailyOffers.map(o => o.price ? `✦ ${escapeHtml(o.title)} — ${escapeHtml(o.price)} جنيه` : `✦ ${escapeHtml(o.title)}`)
+    : ["عروض يومية متجددة في محلات نبيل عبد العال • أسعار مميزة على السلع الأساسية والزيوت والسمنات"];
+  const joined = texts.join("   •   ");
+  track.innerHTML = `<span>${joined}</span><span>${joined}</span>`;
+}
+
+async function loadOffersFromDb() {
+  try {
+    const raw = await fetchJson("/offers.json");
+    const list = [];
+    if (Array.isArray(raw)) {
+      raw.forEach(item => {
+        if (typeof item === "string" && item.trim()) list.push({ title: item.trim(), price: "" });
+        else if (item && typeof item === "object" && String(item.title || "").trim()) {
+          list.push({ title: String(item.title).trim(), price: item.price ? String(item.price).trim() : "" });
+        }
+      });
+    } else if (raw && typeof raw === "object") {
+      Object.values(raw).forEach(item => {
+        if (typeof item === "string" && item.trim()) list.push({ title: item.trim(), price: "" });
+        else if (item && typeof item === "object" && String(item.title || "").trim()) {
+          list.push({ title: String(item.title).trim(), price: item.price ? String(item.price).trim() : "" });
+        }
+      });
+    }
+    state.dailyOffers = list;
+  } catch {
+    state.dailyOffers = [];
+  }
+  renderDailyOffersTicker();
+}
+
+async function loadCategoriesFromDb() {
+  try {
+    const raw = await fetchJson("/categories.json");
+    if (!raw) {
+      state.customCategories = [];
+      return;
+    }
+    if (Array.isArray(raw)) {
+      state.customCategories = raw.map(x => typeof x === "string" ? x : x?.name).filter(Boolean);
+    } else if (typeof raw === "object") {
+      state.customCategories = Object.values(raw).map(x => typeof x === "string" ? x : x?.name).filter(Boolean);
+    }
+  } catch {}
+}
+
+async function loadProducts() {
+  const banner = document.getElementById("dbErrorBanner");
+  try {
+    await Promise.allSettled([loadCategoriesFromDb(), loadOffersFromDb()]);
+    let data = await fetchJson("/products.json");
+    let list = extractProductsList(data);
+
+    if (list.length === 0) {
+      const fallbackPaths = ["/store/products.json", "/nabil_store/products.json", "/items.json"];
+      for (const p of fallbackPaths) {
+        try {
+          const fbData = await fetchJson(p);
+          const fbList = extractProductsList(fbData);
+          if (fbList.length > 0) {
+            list = fbList;
+            break;
+          }
+        } catch {}
+      }
+    }
+
+    const dedupMap = new Map();
+    for (const item of list) {
+      const k = item.id || item.name;
+      dedupMap.set(k, item);
+    }
+
+    state.products = Array.from(dedupMap.values());
+    banner.style.display = "none";
+    renderCategories();
+    renderProducts();
+  } catch (err) {
+    banner.style.display = "block";
+    banner.textContent = "تعذر الاتصال بقاعدة بيانات المنتجات حالياً. تأكد من صلاحيات القراءة في Firebase أو اضغط تحديث الآن.";
+    renderCategories();
+    renderProducts();
+  }
+}
+
+function startRealtimePolling() {
+  loadProducts();
+  setInterval(loadProducts, 6000);
+}
+
+function getFilteredProducts() {
+  const q = state.searchQuery.trim().toLowerCase();
+  return state.products.filter(p => {
+    const catMatch = state.selectedCategory === "الكل" || p.category === state.selectedCategory;
+    const textMatch = !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+    return catMatch && textMatch;
+  });
+}
+
+function renderCategories() {
+  const bar = document.getElementById("categoriesBar");
+  const dynamicCats = Array.from(new Set(state.products.map(p => p.category).filter(Boolean)));
+  const allCats = Array.from(new Set([...DEFAULT_CATEGORIES, ...state.customCategories, ...dynamicCats]));
+
+  bar.innerHTML = allCats.map(cat => {
+    const activeClass = state.selectedCategory === cat ? "active" : "";
+    return `<button type="button" class="cat-btn ${activeClass}" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`;
+  }).join("");
+
+  bar.querySelectorAll(".cat-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.selectedCategory = btn.getAttribute("data-cat") || "الكل";
+      renderCategories();
+      renderProducts();
+    });
+  });
+}
+
+function renderProducts() {
+  const filtered = getFilteredProducts();
+  const countEl = document.getElementById("productsCount");
+  const grid = document.getElementById("productsGrid");
+
+  countEl.textContent = `عدد المنتجات: ${filtered.length}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted);">لا توجد منتجات مطابقة حالياً.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const qty = Number(state.cart[p.id]?.qty || 0);
+    const imgHtml = p.image
+      ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.parentElement.textContent='🛒'" />`
+      : "🛒";
+    return `
+      <article class="p-card">
+        <div>
+          <div class="p-img">${imgHtml}</div>
+          <div class="p-name">${escapeHtml(p.name)}</div>
+          <div class="p-cat">${escapeHtml(p.category)}</div>
+          <div class="p-price">${p.price} جنيه</div>
+        </div>
+        <div class="qty-box">
+          <button type="button" class="btn-outline qty-btn" data-action="dec" data-id="${escapeHtml(p.id)}">-</button>
+          <span class="qty-val">${qty}</span>
+          <button type="button" class="btn-primary qty-btn" data-action="inc" data-id="${escapeHtml(p.id)}">+</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  grid.querySelectorAll(".qty-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const action = btn.getAttribute("data-action");
+      changeQty(id, action === "inc" ? 1 : -1);
+    });
+  });
+}
+
+function changeQty(productId, delta) {
+  const prod = state.products.find(p => p.id === productId);
+  if (!prod) return;
+  const current = Number(state.cart[productId]?.qty || 0);
+  const next = Math.max(0, current + delta);
+  if (next === 0) {
+    delete state.cart[productId];
+  } else {
+    state.cart[productId] = {
+      id: prod.id,
+      name: prod.name,
+      price: prod.price,
+      qty: next
+    };
+  }
+  saveCart();
+  renderProducts();
+  renderCartModal();
+}
+
+function updateCartBadge() {
+  const totalQty = Object.values(state.cart).reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  document.getElementById("cartBadge").textContent = String(totalQty);
+}
+
+function renderCartModal() {
+  const container = document.getElementById("cartItems");
+  const totalEl = document.getElementById("cartTotal");
+  const items = Object.values(state.cart);
+
+  if (items.length === 0) {
+    container.innerHTML = `<div style="color:var(--muted);padding:12px 0;">السلة فارغة حالياً.</div>`;
+    totalEl.textContent = "الإجمالي: 0 جنيه";
+    return;
+  }
+
+  let total = 0;
+  container.innerHTML = items.map(item => {
+    const lineTotal = Number(item.price || 0) * Number(item.qty || 0);
+    total += lineTotal;
+    return `
+      <div class="cart-item">
+        <div>
+          <div style="font-weight:700;">${escapeHtml(item.name)}</div>
+          <div style="font-size:12px;color:var(--muted);">${item.price} جنيه × ${item.qty} = ${lineTotal} جنيه</div>
+        </div>
+        <div class="qty-box" style="width:auto;">
+          <button type="button" class="btn-outline qty-btn" data-c-dec="${escapeHtml(item.id)}">-</button>
+          <span class="qty-val">${item.qty}</span>
+          <button type="button" class="btn-primary qty-btn" data-c-inc="${escapeHtml(item.id)}">+</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  totalEl.textContent = `الإجمالي: ${total} جنيه`;
+
+  container.querySelectorAll("[data-c-dec]").forEach(b => b.addEventListener("click", () => changeQty(b.getAttribute("data-c-dec"), -1)));
+  container.querySelectorAll("[data-c-inc]").forEach(b => b.addEventListener("click", () => changeQty(b.getAttribute("data-c-inc"), 1)));
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add("open");
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove("open");
+}
+
+document.getElementById("cartFab").addEventListener("click", () => {
+  renderCartModal();
+  document.getElementById("orderStatus").textContent = "";
+  openModal("cartModal");
+});
+
+document.getElementById("supportFab").addEventListener("click", () => {
+  document.getElementById("supportStatus").textContent = "";
+  openModal("supportModal");
+});
+
+document.querySelectorAll("[data-close]").forEach(btn => {
+  btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close")));
+});
+
+document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) backdrop.classList.remove("open");
+  });
+});
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  state.searchQuery = e.target.value || "";
+  renderProducts();
+});
+
+document.getElementById("refreshProductsBtn").addEventListener("click", loadProducts);
+
+document.getElementById("orderForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const statusEl = document.getElementById("orderStatus");
+  const items = Object.values(state.cart);
+  if (items.length === 0) {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "أضف منتجاً واحداً على الأقل قبل تأكيد الطلب.";
+    return;
+  }
+
+  const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000) + "-" + String(Date.now()).slice(-3);
+  const total = items.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 0), 0);
+  const phoneClean = document.getElementById("custPhone").value.trim();
+
+  const orderPayload = {
+    id: orderId,
+    orderCode: orderId,
+    customerName: document.getElementById("custName").value.trim(),
+    customerPhone: phoneClean,
+    phone: phoneClean,
+    address: document.getElementById("custAddress").value.trim(),
+    notes: document.getElementById("custNotes").value.trim(),
+    items,
+    total,
+    status: "قيد التجهيز",
+    createdAt: new Date().toISOString(),
+    timestamp: Date.now(),
+    deleted: false
+  };
+
+  try {
+    const res = await fetch(`${DB_URL}/orders/${encodeURIComponent(orderId)}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.cart = {};
+    saveCart();
+    renderProducts();
+    renderCartModal();
+    document.getElementById("orderForm").reset();
+    statusEl.style.color = "var(--ok)";
+    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز.`;
+  } catch {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "تعذر إرسال الطلب الآن. حاول مرة أخرى.";
+  }
+});
+
+document.getElementById("supportForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const statusEl = document.getElementById("supportStatus");
+  const ticketId = "SUP-" + Date.now();
+  const payload = {
+    id: ticketId,
+    name: document.getElementById("supName").value.trim(),
+    phone: document.getElementById("supPhone").value.trim(),
+    message: document.getElementById("supMsg").value.trim(),
+    createdAt: new Date().toISOString(),
+    timestamp: Date.now()
+  };
+  try {
+    const res = await fetch(`${DB_URL}/complaints/${encodeURIComponent(ticketId)}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    document.getElementById("supportForm").reset();
+    statusEl.style.color = "var(--ok)";
+    statusEl.textContent = "تم إرسال رسالتك بنجاح وسيتواصل معك فريق المتجر.";
+  } catch {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "تعذر إرسال الرسالة الآن. حاول مرة أخرى.";
+  }
+});
+
+function renderTrackedOrderCard(found) {
+  const orderKey = String(found._key || found.id || found.orderCode || "");
+  const statusText = String(found.status || "قيد التجهيز");
+  const itemsText = Array.isArray(found.items)
+    ? found.items.map(i => `${escapeHtml(i.name)} (${i.qty})`).join("، ")
+    : "";
+  const allowEditCancel = canCustomerModifyOrder(statusText);
+
+  const actionsHtml = allowEditCancel
+    ? `
+      <div class="order-actions">
+        <button type="button" class="btn-primary" data-edit-order="${escapeHtml(orderKey)}">✏️ تعديل الطلب</button>
+        <button type="button" class="btn-danger-soft" data-cancel-order="${escapeHtml(orderKey)}">✕ إلغاء الطلب</button>
+      </div>
+    `
+    : `<div style="margin-top:8px;font-size:12px;color:var(--muted);">تم تحديث حالة الطلب من الإدارة ولا يمكن تعديله أو إلغاؤه الآن.</div>`;
+
+  return `
+    <div class="order-box">
+      <div><strong>رقم الطلب:</strong> ${escapeHtml(orderKey)}</div>
+      <div style="margin-top:6px;"><strong>الحالة الحالية:</strong> ${getStatusBadgeHtml(statusText)}</div>
+      <div style="margin-top:6px;"><strong>العميل:</strong> ${escapeHtml(found.customerName || "")}</div>
+      <div><strong>الإجمالي:</strong> ${escapeHtml(found.total ?? 0)} جنيه</div>
+      ${itemsText ? `<div style="margin-top:4px;color:var(--muted);"><strong>الأصناف:</strong> ${itemsText}</div>` : ""}
+      ${actionsHtml}
+    </div>
+  `;
+}
+
+function bindTrackedOrderActions() {
+  const out = document.getElementById("trackResult");
+  out.querySelectorAll("[data-edit-order]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const oid = btn.getAttribute("data-edit-order");
+      const target = state.trackedOrders.find(o => String(o._key || o.id || o.orderCode) === oid);
+      if (!target || !canCustomerModifyOrder(target.status)) return;
+      state.editingOrderId = oid;
+      state.editingItems = Array.isArray(target.items)
+        ? target.items.map(it => ({ ...it, qty: Number(it.qty || 1), price: Number(it.price || 0) }))
+        : [];
+      document.getElementById("editOrderCodeLabel").textContent = `(${oid})`;
+      document.getElementById("editOrderStatus").textContent = "";
+      renderEditOrderModal();
+      openModal("editOrderModal");
+    });
+  });
+
+  out.querySelectorAll("[data-cancel-order]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const oid = btn.getAttribute("data-cancel-order");
+      const target = state.trackedOrders.find(o => String(o._key || o.id || o.orderCode) === oid);
+      if (!target || !canCustomerModifyOrder(target.status)) return;
+      const updated = { ...target, status: "ملغي بواسطة العميل", updatedAt: Date.now() };
+      delete updated._key;
+      try {
+        const res = await fetch(`${DB_URL}/orders/${encodeURIComponent(oid)}.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updated)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        target.status = "ملغي بواسطة العميل";
+        out.innerHTML = renderTrackedOrderCard(target);
+        bindTrackedOrderActions();
+      } catch {
+        out.innerHTML += `<div style="color:var(--danger);font-size:12px;margin-top:6px;">تعذر إلغاء الطلب الآن.</div>`;
+      }
+    });
+  });
+}
+
+function renderEditOrderModal() {
+  const container = document.getElementById("editOrderItems");
+  const totalEl = document.getElementById("editOrderTotal");
+  const activeItems = state.editingItems.filter(i => Number(i.qty || 0) > 0);
+
+  if (activeItems.length === 0) {
+    container.innerHTML = `<div style="color:var(--muted);padding:12px 0;">لا توجد أصناف في الطلب (سيتم إلغاء الطلب إذا حفظت وهو فارغ).</div>`;
+    totalEl.textContent = "الإجمالي الجديد: 0 جنيه";
+    return;
+  }
+
+  let total = 0;
+  container.innerHTML = activeItems.map((item, idx) => {
+    const lineTotal = Number(item.price || 0) * Number(item.qty || 0);
+    total += lineTotal;
+    return `
+      <div class="cart-item">
+        <div>
+          <div style="font-weight:700;">${escapeHtml(item.name)}</div>
+          <div style="font-size:12px;color:var(--muted);">${item.price} جنيه × ${item.qty} = ${lineTotal} جنيه</div>
+        </div>
+        <div class="qty-box" style="width:auto;">
+          <button type="button" class="btn-outline qty-btn" data-ed-dec="${idx}">-</button>
+          <span class="qty-val">${item.qty}</span>
+          <button type="button" class="btn-primary qty-btn" data-ed-inc="${idx}">+</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  totalEl.textContent = `الإجمالي الجديد: ${total} جنيه`;
+
+  container.querySelectorAll("[data-ed-dec]").forEach(b => {
+    b.addEventListener("click", () => {
+      const i = Number(b.getAttribute("data-ed-dec"));
+      if (state.editingItems[i]) {
+        state.editingItems[i].qty = Math.max(0, Number(state.editingItems[i].qty || 0) - 1);
+        renderEditOrderModal();
+      }
+    });
+  });
+
+  container.querySelectorAll("[data-ed-inc]").forEach(b => {
+    b.addEventListener("click", () => {
+      const i = Number(b.getAttribute("data-ed-inc"));
+      if (state.editingItems[i]) {
+        state.editingItems[i].qty = Number(state.editingItems[i].qty || 0) + 1;
+        renderEditOrderModal();
+      }
+    });
+  });
+}
+
+document.getElementById("saveEditedOrderBtn").addEventListener("click", async () => {
+  const statusEl = document.getElementById("editOrderStatus");
+  const oid = state.editingOrderId;
+  const target = state.trackedOrders.find(o => String(o._key || o.id || o.orderCode) === oid);
+  if (!target || !canCustomerModifyOrder(target.status)) {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "لا يمكن تعديل هذا الطلب الآن.";
+    return;
+  }
+
+  const nextItems = state.editingItems.filter(i => Number(i.qty || 0) > 0);
+  const nextTotal = nextItems.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 0), 0);
+  const updated = {
+    ...target,
+    items: nextItems,
+    total: nextTotal,
+    status: nextItems.length === 0 ? "ملغي بواسطة العميل" : (target.status || "قيد التجهيز"),
+    updatedAt: Date.now()
+  };
+  delete updated._key;
+
+  try {
+    const res = await fetch(`${DB_URL}/orders/${encodeURIComponent(oid)}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    Object.assign(target, updated, { _key: oid });
+    document.getElementById("trackResult").innerHTML = renderTrackedOrderCard(target);
+    bindTrackedOrderActions();
+    statusEl.style.color = "var(--ok)";
+    statusEl.textContent = "تم حفظ تعديلات الطلب بنجاح.";
+    setTimeout(() => closeModal("editOrderModal"), 700);
+  } catch {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "تعذر حفظ التعديل الآن. حاول مرة أخرى.";
+  }
+});
+
+document.getElementById("trackBtn").addEventListener("click", async () => {
+  const query = document.getElementById("trackInput").value.trim().toLowerCase();
+  const out = document.getElementById("trackResult");
+  if (!query) {
+    out.innerHTML = `<div class="order-box" style="color:var(--danger);">اكتب رقم الطلب أو رقم الهاتف أولاً.</div>`;
+    return;
+  }
+  out.innerHTML = `<div class="order-box">جاري البحث عن الطلب...</div>`;
+  try {
+    const raw = await fetchJson("/orders.json");
+    const list = raw && typeof raw === "object"
+      ? Object.entries(raw).map(([k, v]) => ({ ...(v || {}), _key: v?.id || k })).filter(o => !o.deleted)
+      : [];
+    state.trackedOrders = list;
+    const found = list.find(o =>
+      String(o._key || o.id || o.orderCode || "").toLowerCase() === query ||
+      String(o.customerPhone || o.phone || "").trim().toLowerCase() === query
+    );
+    if (!found) {
+      out.innerHTML = `<div class="order-box">لم يتم العثور على طلب مطابق لهذا الرقم.</div>`;
+      return;
+    }
+    out.innerHTML = renderTrackedOrderCard(found);
+    bindTrackedOrderActions();
+  } catch {
+    out.innerHTML = `<div class="order-box" style="color:var(--danger);">تعذر جلب بيانات الطلب حالياً.</div>`;
+  }
+});
+
+updateCartBadge();
+startRealtimePolling();
+</script>
+</body>
+</html>
