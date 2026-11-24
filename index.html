@@ -6,8 +6,8 @@
 <title>محلات نبيل عبد العال | مع محلات نبيل عبد العال عمرك ما هتنام جعان</title>
 <style>
   :root {
-    --bg: #eae4d7;
-    --card: #fbf9f4;
+    --bg: #dcecfa;
+    --card: #f7fbff;
     --text: #18181b;
     --muted: #52525b;
     --navy: #0b2447;
@@ -16,7 +16,7 @@
     --accent: #d97706;
     --accent-bright: #f59e0b;
     --gold-soft: #fef3c7;
-    --border: #d8d0c0;
+    --border: #bfd3e8;
     --danger: #dc2626;
     --ok: #15803d;
   }
@@ -194,7 +194,7 @@
   .btn-primary { background: var(--navy); color: #fff; border: none; }
   .btn-primary:hover { background: var(--navy-deep); }
   .btn-accent { background: linear-gradient(135deg, var(--accent-bright), var(--accent)); color: #06152b; border: none; font-weight: 900; }
-  .btn-outline { background: #f3eee4; color: var(--navy); border-color: #cfc6b4; }
+  .btn-outline { background: #e8f1fb; color: var(--navy); border-color: #b4cae2; }
   .btn-danger-soft { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
   .meta-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 13px; color: var(--muted); gap: 8px; flex-wrap: wrap; }
@@ -224,13 +224,13 @@
     box-shadow: 0 2px 6px rgba(11, 36, 71, 0.05);
   }
   .p-card.unavailable-card {
-    background: #f9f6f0;
+    background: #f1f7fd;
     border-color: #e5c4c4;
   }
   .p-img {
     position: relative;
     width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 11px;
-    background: linear-gradient(145deg, #e7e5de, #f8f7f4);
+    background: linear-gradient(145deg, #dbe7f3, #f4f9fe);
     display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--muted); overflow: hidden;
   }
   .p-img img { width: 100%; height: 100%; object-fit: cover; }
@@ -252,6 +252,33 @@
     font-size: 11.5px; color: var(--navy); background: var(--gold-soft); border: 1px solid #fde68a;
     border-radius: 6px; padding: 2px 7px; width: fit-content; margin-top: 4px; font-weight: 700;
   }
+  :root { --offer: #19376d; --offer-soft: #e6eeff; }
+  .offer-cards { display:flex; gap:12px; overflow-x:auto; padding:2px 2px 12px; margin-bottom:6px; scroll-snap-type:x proximity; }
+  .offer-card { flex:0 0 80%; max-width:300px; scroll-snap-align:start; position:relative; color:#fff; border:1px solid #f59e0b; border-radius:16px; overflow:hidden; box-shadow:0 6px 16px rgba(6,21,43,.35); cursor:pointer; display:flex; flex-direction:column; text-align:right; padding:0;
+    background: radial-gradient(circle at 12% 0%, rgba(245,158,11,.35), transparent 45%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.28), transparent 50%), linear-gradient(145deg,#06152b 0%,#0b2447 50%,#19376d 100%); }
+  .oc-art { position:relative; height:132px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:2px; color:#fff;
+    background: radial-gradient(circle at 18% 25%, rgba(245,158,11,.75), transparent 38%), radial-gradient(circle at 85% 20%, rgba(251,113,133,.6), transparent 36%), radial-gradient(circle at 70% 95%, rgba(56,189,248,.6), transparent 42%), linear-gradient(135deg,#06152b,#1e3a8a); }
+  .oc-art::before { content:""; position:absolute; inset:0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 10px, transparent 10px 22px); }
+  .oc-art > * { position:relative; }
+  .oc-art .oc-big { font-size:30px; font-weight:900; text-shadow:0 2px 6px rgba(0,0,0,.45); color:#fde68a; }
+  .oc-art .oc-sub { font-size:13px; font-weight:700; color:#e0f2fe; }
+  .oc-photo { position:relative; height:132px; }
+  .oc-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .oc-photo::after { content:""; position:absolute; inset:auto 0 0 0; height:55%; background:linear-gradient(to top, #0b2447, transparent); }
+  .oc-ribbon { position:absolute; top:10px; right:0; z-index:2; background:linear-gradient(90deg,#f59e0b,#fbbf24); color:#06152b; font-weight:900; font-size:12px; padding:3px 12px 3px 16px; border-radius:999px 0 0 999px; box-shadow:0 2px 6px rgba(0,0,0,.3); }
+  .offer-card .oc-body { padding:10px 12px 12px; display:flex; flex-direction:column; gap:7px; }
+  .offer-card .oc-title { font-weight:800; color:#fff; font-size:15px; }
+  .offer-card .oc-price { font-weight:900; color:#fcd34d; font-size:19px; }
+  .oc-old { color:#6b7280; text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:#fb7185; font-size:13px; margin-inline-start:8px; font-weight:600; }
+  .oc-save { display:inline-block; background:#fef3c7; color:#92400e; border:1px solid #f59e0b; border-radius:999px; padding:1px 8px; font-size:12px; font-weight:800; margin-inline-start:8px; }
+  .offer-card .oc-old { color:#cbd5e1; }
+  .offer-card .oc-cta { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#06152b; border-radius:10px; padding:8px 10px; font-weight:900; font-size:13px; text-align:center; }
+  .bundle-items { background:var(--offer-soft); border:1px solid #bfd0f5; border-radius:10px; padding:8px 10px; font-size:13.5px; color:#0b2447; display:grid; gap:4px; margin:8px 0; }
+  .btn-offer { background:linear-gradient(135deg,#0b2447,#19376d); color:#fff; border:2px solid #f59e0b; }
+  .oc-modal-hero { border-radius:12px; overflow:hidden; margin-bottom:4px; }
+  .oc-modal-hero .oc-art, .oc-modal-hero .oc-photo { height:150px; }
+  .oc-modal-hero img { width:100%; height:100%; object-fit:cover; display:block; }
+  .cart-notice { background:#fef3c7; border:1px solid #f59e0b; color:#7c2d12; border-radius:10px; padding:8px 10px; margin-bottom:8px; font-size:13px; font-weight:700; }
   .p-price { font-weight: 900; color: var(--navy); font-size: 15.5px; margin: 7px 0 8px; }
   .qty-box { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #f3eee4; padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
   .qty-btn { width: 32px; height: 32px; padding: 0; border-radius: 8px; font-size: 18px; line-height: 1; }
@@ -288,6 +315,30 @@
   .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .modal-head h3 { margin: 0; font-size: 17px; color: var(--navy); }
   .close-btn { width: auto; padding: 6px 12px; border-radius: 8px; background: #e8e2d5; color: var(--navy); border: none; }
+
+  /* ===== سلة وطلبات منظمة ===== */
+  #cartTotal { display:none; }
+  .cl-card { display:flex; gap:10px; align-items:center; background:#fff; border:1px solid var(--border); border-radius:14px; padding:8px; margin-bottom:8px; box-shadow:0 2px 8px rgba(11,36,71,.06); }
+  .cl-img { width:58px; height:58px; border-radius:10px; object-fit:cover; flex:0 0 58px; background:#dbe7f3; display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--navy); font-size:20px; overflow:hidden; }
+  .cl-img img { width:100%; height:100%; object-fit:cover; display:block; }
+  .cl-main { flex:1; min-width:0; }
+  .cl-name { font-weight:800; color:var(--navy); font-size:14px; }
+  .cl-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .cl-total { font-weight:900; color:var(--navy); font-size:14px; margin-top:3px; }
+  .cart-summary { background:linear-gradient(135deg,#0b2447,#19376d); color:#fff; border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; margin:10px 0; }
+  .cart-summary b { color:#fcd34d; font-size:18px; }
+  .ord-card { background:#fff; border:1px solid var(--border); border-top:4px solid var(--navy); border-radius:14px; padding:12px; margin-top:10px; box-shadow:0 2px 8px rgba(11,36,71,.06); font-size:13px; }
+  .ord-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ord-code { font-weight:900; color:var(--navy); font-size:14px; direction:ltr; }
+  .ord-steps { display:flex; gap:4px; margin:10px 0; }
+  .ord-step { flex:1; text-align:center; font-size:11px; font-weight:700; padding:6px 2px; border-radius:8px; background:#e8f1fb; color:#64748b; border:1px solid #bfd3e8; }
+  .ord-step.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .ord-step.done { background:#dcfce7; color:#166534; border-color:#86efac; }
+  .ord-line { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed var(--border); }
+  .ord-line small { display:block; color:var(--muted); font-size:11.5px; }
+  .ord-line.un { opacity:.75; } .ord-line.un > span:first-child { text-decoration:line-through; } .un-tag { display:inline-block; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; border-radius:999px; font-size:11px; font-weight:800; padding:1px 8px; margin-top:3px; text-decoration:none; }
+  .un-note { background:#fef3c7; border:1px solid #f59e0b; color:#92400e; border-radius:10px; padding:8px 10px; margin-top:8px; font-size:12.5px; font-weight:700; }
+  .ord-total { display:flex; justify-content:space-between; font-weight:900; color:var(--navy); font-size:15px; margin-top:8px; }
   .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 8px; }
   .status-msg { font-size: 13px; margin-top: 8px; color: var(--muted); }
   .order-box { background: #f3eee4; border: 1px solid var(--border); border-right: 4px solid var(--navy); border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 13px; }
@@ -398,6 +449,11 @@
     </div>
   </section>
 
+  <section id="offerCardsSection" class="panel" style="display:none;">
+    <h2 class="section-title" style="--x:0;"><span style="color:var(--navy);">عروض الباكدج</span></h2>
+    <div id="offerCards" class="offer-cards"></div>
+  </section>
+
   <div id="categoriesBar" class="cats"></div>
 
   <section class="panel">
@@ -420,6 +476,11 @@
   <span id="cartBarTotal" class="cart-total-label">0 جنيه</span>
 </button>
 
+
+<!-- نافذة تفاصيل عرض الباكدج -->
+<div id="bundleModal" class="modal-backdrop">
+  <div class="modal-sheet" id="bundleSheet"></div>
+</div>
 
 <!-- نافذة السلة وإتمام الطلب -->
 <div id="cartModal" class="modal-backdrop">
@@ -509,7 +570,7 @@ async function ensureToken() {
 
 // كل الطلبات على قاعدة البيانات بتعدي من هنا وبتبعت هوية الجهاز (تسجيل دخول مجهول)
 const PUBLIC_READ_PATHS = ["/products.json", "/categories.json", "/offers.json"];
-async function dbReq(method, path, body) {
+async function dbReq(method, path, body, extraHeaders) {
   if (!authEnabled()) {
     // بدون إعداد الأمان: قراءة المنتجات والعروض بس. أي طلب أو شكوى أو قراءة طلبات مرفوضة.
     if (!(method === "GET" && PUBLIC_READ_PATHS.some(p => path.startsWith(p)))) throw new Error("SETUP_MISSING");
@@ -519,9 +580,10 @@ async function dbReq(method, path, body) {
   const url = `${DB_URL}${path}${token ? `${sep}auth=${encodeURIComponent(token)}` : ""}`;
   const opts = { method };
   if (method === "GET") opts.cache = "no-store";
-  if (body !== undefined) { opts.headers = { "Content-Type": "application/json" }; opts.body = JSON.stringify(body); }
+  if (extraHeaders) opts.headers = { ...extraHeaders };
+  if (body !== undefined) { opts.headers = { ...(opts.headers || {}), "Content-Type": "application/json" }; opts.body = JSON.stringify(body); }
   const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok && res.status !== 304) throw new Error(`HTTP ${res.status}`);
   return res;
 }
 
@@ -534,6 +596,39 @@ function addMyOrderId(id) {
 }
 const PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#9a948a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 11.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 2-1.5L21 7H6"/></svg>';
 window.PLACEHOLDER_SVG = PLACEHOLDER_SVG;
+
+// ===== حساب الطلبات: الإجمالي بيتحسب دايماً من الأصناف (سعر × كمية) ولا يعتمد على رقم "total" المخزّن =====
+function orderItemsList(o) {
+  const it = o && o.items;
+  if (Array.isArray(it)) return it.filter(x => x && typeof x === "object");
+  if (it && typeof it === "object") return Object.values(it).filter(x => x && typeof x === "object");
+  return [];
+}
+function orderBundlesList(o) {
+  const b = o && o.bundles;
+  return (b && typeof b === "object") ? Object.values(b).filter(x => x && typeof x === "object") : [];
+}
+// أسطر الطلب اللي المحل علّمها "غير متوفر": المفتاح i_<معرف المنتج> أو b_<معرف العرض>. الطلب الأصلي بيفضل زي ما هو، والإجمالي بيتحسب بعد خصم السطر.
+function orderUnavail(o) { const u = o && o.unavailable; return (u && typeof u === "object") ? u : {}; }
+function lineKey(kind, line) { return (kind === "b" ? "b_" : "i_") + String(line && line.id); }
+function lineIsUnavail(o, kind, line) { return orderUnavail(o)[lineKey(kind, line)] === true; }
+function orderGross(o) {
+  return orderItemsList(o).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0)
+    + orderBundlesList(o).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+}
+function orderDeducted(o) {
+  return orderItemsList(o).filter(i => lineIsUnavail(o, "i", i)).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0)
+    + orderBundlesList(o).filter(b => lineIsUnavail(o, "b", b)).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+}
+function orderTotal(o) { return orderGross(o) - orderDeducted(o); }
+function orderBundlesText(o) {
+  // أسماء المكونات بتتجاب من كتالوج المنتجات بالكود (مش من نص بيبعته العميل)
+  const nm = id => { const p = state.products.find(pr => pr.id === id); return p ? p.name : `منتج غير متاح (${id})`; };
+  return orderBundlesList(o).map(b => {
+    const its = (b.items && typeof b.items === "object") ? Object.values(b.items).filter(i => i && typeof i === "object") : [];
+    return `عرض ${escapeHtml(b.title)} (${escapeHtml(b.qty)}): ` + its.map(i => `${escapeHtml(i.qty)}× ${escapeHtml(nm(i.id))}`).join("، ");
+  });
+}
 const DEFAULT_CATEGORIES = [
   "الكل",
   "السلع الاساسيه",
@@ -551,6 +646,9 @@ let state = {
   searchQuery: "",
   cart: loadCart(),
   trackedOrders: [],
+  offersFull: [],
+  cartNotices: [],
+  noticeUnacked: false,
   editingOrderId: null,
   editingItems: []
 };
@@ -612,7 +710,7 @@ function normalizeProduct(id, raw) {
   const image = String(raw.image ?? raw.img ?? raw.imageUrl ?? raw.photo ?? "").trim();
   const available = !(raw.available === false || raw.active === false || raw.hidden === true);
   return {
-    id: String(raw.id ?? id),
+    id: String(id),
     name,
     price,
     category,
@@ -668,10 +766,19 @@ function extractProductsList(payload) {
   return items;
 }
 
+// قراءة بالـ ETag: لو البيانات ما اتغيّرتش السيرفر يرد 304 بدون محتوى، فمنحمّلش كتالوج المنتجات (حجمه كبير) كل مرة.
+const ETAG_CACHE = {};
 async function fetchJson(path) {
   const sep = path.includes("?") ? "&" : "?";
-  const res = await dbReq("GET", `${path}${sep}_t=${Date.now()}`);
-  return res.json();
+  const cached = ETAG_CACHE[path];
+  const headers = { "X-Firebase-ETag": "true" };
+  if (cached) headers["If-None-Match"] = cached.etag;
+  const res = await dbReq("GET", `${path}${sep}_t=${Date.now()}`, undefined, headers);
+  if (res.status === 304 && cached) return JSON.parse(cached.text);
+  const text = await res.text();
+  const etag = res.headers.get("ETag");
+  if (etag) ETAG_CACHE[path] = { etag, text };
+  return JSON.parse(text);
 }
 
 function formatOfferPrice(v) {
@@ -710,10 +817,14 @@ async function loadOffersFromDb() {
       });
     }
     state.dailyOffers = list;
+    state.offersFull = (raw && typeof raw === "object" && !Array.isArray(raw))
+      ? Object.entries(raw).map(([k, v]) => (v && typeof v === "object") ? { ...v, id: String(k) } : null).filter(Boolean)
+      : [];
   } catch {
     state.dailyOffers = [];
   }
   renderDailyOffersTicker();
+  renderOfferCards();
 }
 
 async function loadCategoriesFromDb() {
@@ -760,17 +871,44 @@ async function loadProducts() {
 
     state.products = Array.from(dedupMap.values());
     let cartChanged = false;
+    let changes = 0;
     for (const pid of Object.keys(state.cart)) {
+      const line = state.cart[pid];
+      if (String(pid).startsWith("bundle_")) {
+        const off = state.offersFull.find(x => x.id === pid.slice(7));
+        const b = getBundle(off);
+        if (!off || !b || bundleProblem(off)) {
+          state.cartNotices.push(`عرض «${line.name}» لم يعد متاحاً وتم حذفه من السلة.`);
+          delete state.cart[pid]; cartChanged = true; changes++;
+        } else {
+          const sig = JSON.stringify(Object.entries(line.items || {}).sort());
+          const nsig = JSON.stringify(b.items.map(i => [i.pid, i.qty]).sort());
+          if (Number(line.price) !== b.price || line.name !== off.title || sig !== nsig) {
+            state.cartNotices.push(`عرض «${off.title}» اتغيّر: السعر دلوقتي ${b.price} جنيه، راجع محتوياته.`);
+            line.price = b.price; line.name = off.title; line.items = Object.fromEntries(b.items.map(i => [i.pid, i.qty]));
+            cartChanged = true; changes++;
+          }
+        }
+        continue;
+      }
       const foundProd = state.products.find(pr => pr.id === pid);
       if (!foundProd || !foundProd.available) {
+        state.cartNotices.push(`«${line.name}» لم يعد متاحاً وتم حذفه من السلة.`);
         delete state.cart[pid];
-        cartChanged = true;
+        cartChanged = true; changes++;
+      } else if (Number(line.price) !== Number(foundProd.price) || line.name !== foundProd.name) {
+        if (Number(line.price) !== Number(foundProd.price)) {
+          state.cartNotices.push(`سعر «${foundProd.name}» اتغيّر من ${line.price} إلى ${foundProd.price} جنيه.`);
+        }
+        line.price = foundProd.price; line.name = foundProd.name;
+        cartChanged = true; changes++;
       }
     }
-    if (cartChanged) saveCart();
-
+    if (cartChanged) { state.noticeUnacked = true; saveCart(); renderCartModal(); }
+    state.lastCartChanges = changes;
     banner.style.display = "none";
     renderCategories();
+    renderOfferCards();
     renderProducts();
   } catch (err) {
     banner.style.display = "block";
@@ -782,7 +920,7 @@ async function loadProducts() {
 
 function startRealtimePolling() {
   loadProducts();
-  setInterval(loadProducts, 6000);
+  setInterval(loadProducts, 15000);
 }
 
 function getFilteredProducts() {
@@ -874,11 +1012,95 @@ function renderProducts() {
   });
 }
 
+// ===== عروض الباكدج: السعر الإجمالي بيحدده صاحب المحل في العرض نفسه (offers/<id>/bundle/price) =====
+function getBundle(offer) {
+  const b = offer && offer.bundle;
+  if (!b || typeof b !== "object") return null;
+  const price = Number(b.price);
+  const rawLines = Array.isArray(b.lines) ? b.lines : (b.lines && typeof b.lines === "object" ? Object.values(b.lines) : []);
+  const items = rawLines.filter(x => x && typeof x === "object" && typeof x.pid === "string")
+    .map(x => ({ pid: x.pid, qty: Number(x.qty) })).filter(x => Number.isInteger(x.qty) && x.qty >= 1);
+  if (!Number.isFinite(price) || price <= 0 || items.length === 0 || items.length !== rawLines.length) return null;
+  return { price, items };
+}
+function bundleProblem(offer) {
+  const b = getBundle(offer);
+  if (!b || offer.active === false) return "العرض غير متاح حالياً.";
+  for (const it of b.items) {
+    const p = state.products.find(pr => pr.id === it.pid);
+    if (!p || !p.available) return "أحد منتجات العرض غير متاح حالياً.";
+  }
+  return "";
+}
+function bundleCatalogSum(b) {
+  return b.items.reduce((s, it) => { const p = state.products.find(pr => pr.id === it.pid); return s + (p ? p.price * it.qty : 0); }, 0);
+}
+function renderOfferCards() {
+  const sec = document.getElementById("offerCardsSection");
+  const box = document.getElementById("offerCards");
+  if (!sec || !box) return;
+  const offers = state.offersFull.filter(o => getBundle(o) && o.active !== false);
+  if (!offers.length) { sec.style.display = "none"; box.innerHTML = ""; return; }
+  sec.style.display = "";
+  box.innerHTML = offers.map(o => {
+    const b = getBundle(o);
+    const sum = bundleCatalogSum(b);
+    const art = o.image ? `<div class="oc-photo"><img src="${escapeHtml(o.image)}" alt="" loading="lazy" /></div>`
+      : `<div class="oc-art"><div class="oc-big">${sum > b.price ? "وفّر " + (sum - b.price) + " جنيه" : "عرض خاص"}</div><div class="oc-sub">${b.items.length} منتجات في باكدج واحد</div></div>`;
+    return `<button type="button" class="offer-card" data-offer="${escapeHtml(o.id)}"><span class="oc-ribbon">عرض اليوم</span>${art}
+      <div class="oc-body"><div class="oc-title">${escapeHtml(o.title)}</div>
+      <div><span class="oc-price">${b.price} جنيه</span>${sum > b.price ? `<span class="oc-old" title="مجموع أسعار المنتجات منفردة">بدل ${sum}</span><span class="oc-save">وفّر ${sum - b.price}</span>` : ""}</div>
+      <div class="oc-cta">شوف العرض واطلبه</div></div></button>`;
+  }).join("");
+  box.querySelectorAll("[data-offer]").forEach(el => el.addEventListener("click", () => openBundleModal(el.getAttribute("data-offer"))));
+}
+function openBundleModal(offerId) {
+  const o = state.offersFull.find(x => x.id === offerId);
+  const b = getBundle(o);
+  if (!o || !b) return;
+  const problem = bundleProblem(o);
+  const sum = bundleCatalogSum(b);
+  const rows = b.items.map(it => {
+    const p = state.products.find(pr => pr.id === it.pid);
+    return `<div>• ${it.qty} × ${escapeHtml(p ? p.name : "منتج غير متاح")}</div>`;
+  }).join("");
+  document.getElementById("bundleSheet").innerHTML = `
+    <div class="modal-head"><h3>${escapeHtml(o.title)}</h3><button type="button" class="close-btn" id="bundleClose">إغلاق</button></div>
+    <div class="oc-modal-hero">${o.image ? `<div class="oc-photo"><img src="${escapeHtml(o.image)}" alt="" /></div>` : `<div class="oc-art"><div class="oc-big">${sum > b.price ? "وفّر " + (sum - b.price) + " جنيه" : "عرض خاص"}</div><div class="oc-sub">${b.items.length} منتجات في باكدج واحد</div></div>`}</div>
+    <div class="bundle-items">${rows}</div>
+    <div style="font-weight:900;font-size:20px;color:var(--navy);">سعر الباكدج: ${b.price} جنيه</div>
+    ${sum > b.price ? `<div style="margin-top:2px;font-size:13px;color:var(--muted);">سعر المنتجات منفردة: <span class="oc-old" style="margin:0;">${sum} جنيه</span> <span class="oc-save">وفّر ${sum - b.price} جنيه</span></div>` : ""}
+    ${problem ? `<div class="status-msg" style="color:var(--danger);">${escapeHtml(problem)}</div>` : `<button type="button" class="btn-offer" id="bundleAdd" style="margin-top:10px;width:100%;padding:12px;border-radius:12px;font-weight:800;">أضف الباكدج للسلة</button>`}
+    <div id="bundleMsg" class="status-msg"></div>`;
+  openModal("bundleModal");
+  document.getElementById("bundleClose").onclick = () => closeModal("bundleModal");
+  const add = document.getElementById("bundleAdd");
+  if (add) add.onclick = () => {
+    changeQty("bundle_" + o.id, 1);
+    document.getElementById("bundleMsg").style.color = "var(--ok)";
+    document.getElementById("bundleMsg").textContent = "اتضاف للسلة. افتح السلة لإتمام الطلب.";
+  };
+}
+
 function changeQty(productId, delta) {
+  if (String(productId).startsWith("bundle_")) {
+    const offerId = String(productId).slice(7);
+    const o = state.offersFull.find(x => x.id === offerId);
+    const b = getBundle(o);
+    const cur = Number(state.cart[productId]?.qty || 0);
+    const next = Math.min(10, Math.max(0, cur + delta));
+    if (!o || !b || bundleProblem(o) || next === 0) { delete state.cart[productId]; }
+    else {
+      state.cart[productId] = { id: productId, kind: "bundle", offerId, name: o.title, price: b.price, qty: next,
+        items: Object.fromEntries(b.items.map(it => [it.pid, it.qty])) };
+    }
+    saveCart(); renderProducts(); renderCartModal();
+    return;
+  }
   const prod = state.products.find(p => p.id === productId);
   if (!prod || prod.available === false) return;
   const current = Number(state.cart[productId]?.qty || 0);
-  const next = Math.max(0, current + delta);
+  const next = Math.min(50, Math.max(0, current + delta));
   if (next === 0) {
     delete state.cart[productId];
   } else {
@@ -906,30 +1128,43 @@ function renderCartModal() {
   const totalEl = document.getElementById("cartTotal");
   const items = Object.values(state.cart);
 
+  const noticeHtml = state.cartNotices.length
+    ? `<div class="cart-notice">${state.cartNotices.map(n => `<div>⚠️ ${escapeHtml(n)}</div>`).join("")}<div style="margin-top:4px;">راجع السلة والإجمالي ثم اضغط تأكيد الطلب مرة تانية.</div></div>`
+    : "";
   if (items.length === 0) {
-    container.innerHTML = `<div style="color:var(--muted);padding:12px 0;">السلة فارغة حالياً.</div>`;
+    container.innerHTML = noticeHtml + `<div style="color:var(--muted);padding:12px 0;">السلة فارغة حالياً.</div>`;
     totalEl.textContent = "الإجمالي: 0 جنيه";
     return;
   }
 
   let total = 0;
-  container.innerHTML = items.map(item => {
+  const thumb = item => {
+    let src = "";
+    if (item.kind === "bundle") { const of = (state.offersFull || []).find(x => x.id === item.offerId); src = of && of.image || ""; }
+    else { const p = state.products.find(pr => pr.id === item.id); src = p && p.image || ""; }
+    return `<div class="cl-img">${src ? `<img src="${escapeHtml(src)}" alt="" />` : escapeHtml(String(item.name || "?").trim().charAt(0))}</div>`;
+  };
+  let count = 0;
+  container.innerHTML = noticeHtml + items.map(item => {
     const lineTotal = Number(item.price || 0) * Number(item.qty || 0);
-    total += lineTotal;
+    total += lineTotal; count += Number(item.qty || 0);
     return `
-      <div class="cart-item">
-        <div>
-          <div style="font-weight:700;">${escapeHtml(item.name)}</div>
-          <div style="font-size:12px;color:var(--muted);">${item.price} جنيه × ${item.qty} = ${lineTotal} جنيه</div>
+      <div class="cl-card">
+        ${thumb(item)}
+        <div class="cl-main">
+          <div class="cl-name">${escapeHtml(item.name)}</div>
+          ${item.kind === "bundle" ? `<div class="cl-sub" style="color:var(--royal);font-weight:700;">${Object.entries(item.items || {}).map(([pid, q]) => { const p = state.products.find(pr => pr.id === pid); return escapeHtml(q + "× " + (p ? p.name : "منتج")); }).join("، ")}</div>` : ""}
+          <div class="cl-sub">${item.price} جنيه × ${item.qty}</div>
+          <div class="cl-total">${lineTotal} جنيه</div>
         </div>
-        <div class="qty-box" style="width:auto;">
-          <button type="button" class="btn-outline qty-btn" data-c-dec="${escapeHtml(item.id)}">-</button>
-          <span class="qty-val">${item.qty}</span>
+        <div class="qty-box" style="width:auto;flex-direction:column;">
           <button type="button" class="btn-primary qty-btn" data-c-inc="${escapeHtml(item.id)}">+</button>
+          <span class="qty-val">${item.qty}</span>
+          <button type="button" class="btn-outline qty-btn" data-c-dec="${escapeHtml(item.id)}">-</button>
         </div>
       </div>
     `;
-  }).join("");
+  }).join("") + `<div class="cart-summary"><span>${count} صنف في السلة</span><span>الإجمالي <b>${total}</b> جنيه</span></div>`;
 
   totalEl.textContent = `الإجمالي: ${total} جنيه`;
 
@@ -982,9 +1217,42 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  const submitBtn = e.submitter || document.querySelector("#orderForm button[type=submit]");
+  if (submitBtn) submitBtn.disabled = true;
+  try {
+    // 1) حدّث الأسعار من قاعدة البيانات قبل الإرسال. لو حاجة اتغيرت: وقّف واعرض التغيير للعميل ليؤكد.
+    state.lastCartChanges = 0;
+    await loadProducts();
+    if (state.lastCartChanges > 0 || state.noticeUnacked) {
+      state.noticeUnacked = false;
+      renderCartModal();
+      statusEl.style.color = "var(--danger)";
+      statusEl.textContent = "في تغيير في أسعار أو توفر بعض المنتجات. راجع السلة فوق ثم اضغط تأكيد الطلب تاني.";
+      return;
+    }
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
+  const liveItems = Object.values(state.cart);
+  if (liveItems.length === 0) {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "السلة فاضية دلوقتي بعد تحديث المنتجات.";
+    return;
+  }
   const rnd = crypto.getRandomValues(new Uint32Array(3));
   const orderId = "ORD-" + Array.from(rnd).map(n => n.toString(36).toUpperCase().padStart(6,"0").slice(-6)).join("");
-  const total = items.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 0), 0);
+  // الأصناف بتتخزن كـ object مفتاحه كود المنتج (يمنع تكرار نفس المنتج مرتين) وكل صنف بسعره وقت الطلب
+  const itemsObj = {};
+  const bundlesObj = {};
+  for (const it of liveItems) {
+    if (it.kind === "bundle") {
+      bundlesObj[it.offerId] = { id: it.offerId, title: String(it.name).slice(0, 150), price: Number(it.price), qty: Number(it.qty),
+        items: Object.fromEntries(Object.entries(it.items || {}).map(([pid, q]) => [pid, { id: pid, qty: Number(q) }])) };
+    } else {
+      itemsObj[it.id] = { id: it.id, name: String(it.name).slice(0, 150), price: Number(it.price), qty: Number(it.qty) };
+    }
+  }
+  const total = Object.values(itemsObj).reduce((s, it) => s + it.price * it.qty, 0) + Object.values(bundlesObj).reduce((s, b) => s + b.price * b.qty, 0);
   const phoneClean = document.getElementById("custPhone").value.trim();
 
   const orderPayload = {
@@ -995,13 +1263,14 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     phone: phoneClean,
     address: document.getElementById("custAddress").value.trim(),
     notes: document.getElementById("custNotes").value.trim(),
-    items,
     total,
     status: "قيد التجهيز",
     createdAt: new Date().toISOString(),
     timestamp: Date.now(),
     deleted: false
   };
+  if (Object.keys(itemsObj).length) orderPayload.items = itemsObj;
+  if (Object.keys(bundlesObj).length) orderPayload.bundles = bundlesObj;
 
   try {
     await ensureToken();
@@ -1009,6 +1278,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     await dbReq("PUT", `/orders/${encodeURIComponent(orderId)}.json`, orderPayload);
     addMyOrderId(orderId);
     state.cart = {};
+    state.cartNotices = [];
     saveCart();
     renderProducts();
     renderCartModal();
@@ -1018,9 +1288,18 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز. احتفظ بالرقم لمتابعة طلبك.`;
   } catch (err) {
     statusEl.style.color = "var(--danger)";
-    statusEl.textContent = String(err && err.message) === "SETUP_MISSING"
-      ? "الموقع مش جاهز لاستقبال الطلبات دلوقتي (إعداد الأمان لسه ما اكتملش). كلّم المحل مباشرة."
-      : "تعذر إرسال الطلب الآن. حاول مرة أخرى.";
+    if (String(err && err.message) === "SETUP_MISSING") {
+      statusEl.textContent = "الموقع مش جاهز لاستقبال الطلبات دلوقتي (إعداد الأمان لسه ما اكتملش). كلّم المحل مباشرة.";
+    } else {
+      // رفض من القواعد غالباً معناه إن سعر أو توفر منتج اتغيّر لحظة الإرسال: حدّث السلة واطلب تأكيد
+      state.lastCartChanges = 0;
+      try { await loadProducts(); } catch {}
+      state.noticeUnacked = false;
+      renderCartModal();
+      statusEl.textContent = state.lastCartChanges > 0
+        ? "الأسعار اتحدّثت لحظة الإرسال. راجع السلة فوق وأكد الطلب تاني."
+        : "تعذر إرسال الطلب الآن. حاول مرة أخرى، ولو استمرت المشكلة كلّم المحل.";
+    }
   }
 });
 
@@ -1052,9 +1331,7 @@ document.getElementById("supportForm").addEventListener("submit", async (e) => {
 function renderTrackedOrderCard(found) {
   const orderKey = String(found._key || found.id || "");
   const statusText = String(found.status || "قيد التجهيز");
-  const itemsText = Array.isArray(found.items)
-    ? found.items.map(i => `${escapeHtml(i.name)} (${escapeHtml(i.qty)})`).join("، ")
-    : "";
+  const itemsText = orderItemsList(found).map(i => `${escapeHtml(i.name)} (${escapeHtml(i.qty)})`).concat(orderBundlesText(found)).join("، ");
   const allowChange = canCustomerModifyOrder(statusText);
   const actionsHtml = allowChange
     ? `
@@ -1063,12 +1340,21 @@ function renderTrackedOrderCard(found) {
         <button type="button" class="btn-primary" data-request-change="${escapeHtml(orderKey)}">طلب تعديل</button>
       </div>`
     : `<div style="margin-top:8px;font-size:12px;color:var(--muted);">حالة الطلب اتحدّثت من المحل ومينفعش نعدّله أو نلغيه من هنا دلوقتي.</div>`;
+  const stl = statusText;
+  const cancelled = stl.includes("ملغ");
+  const stage = (stl.includes("تسليم") && !stl.includes("توصيل")) || (stl.includes("تم") && !cancelled) ? 2 : stl.includes("توصيل") ? 1 : 0;
+  const steps = cancelled ? "" : `<div class="ord-steps">${["قيد التجهيز","قيد التوصيل","تم التسليم"].map((t, k) => `<div class="ord-step ${k < stage || (k === 2 && stage === 2) ? "done" : k === stage ? "on" : ""}">${t}</div>`).join("")}</div>`;
+  const rows = orderItemsList(found).map(i => { const un = lineIsUnavail(found, "i", i); return `<div class="ord-line ${un ? "un" : ""}"><span>${escapeHtml(i.name)}<small>${escapeHtml(i.price ?? "?")} جنيه × ${escapeHtml(i.qty)}</small>${un ? `<div class="un-tag">المنتج ده مش متوفر حالياً</div>` : ""}</span><b>${(Number(i.price) || 0) * (Number(i.qty) || 0)} جنيه</b></div>`; }).join("")
+    + orderBundlesList(found).map(b => { const un = lineIsUnavail(found, "b", b); return `<div class="ord-line ${un ? "un" : ""}"><span>${escapeHtml(orderBundlesText({ bundles: { x: b } })[0])}<small>${escapeHtml(b.price)} جنيه × ${escapeHtml(b.qty)}</small>${un ? `<div class="un-tag">العرض ده كله مش متوفر حالياً</div>` : ""}</span><b>${(Number(b.price) || 0) * (Number(b.qty) || 0)} جنيه</b></div>`; }).join("");
+  const ded = orderDeducted(found);
+  const unNote = ded > 0 ? `<div class="un-note">في أصناف مش متوفرة في طلبك. اتخصم ${ded} جنيه من الإجمالي (كان ${orderGross(found)} جنيه). لأي استفسار تواصل مع المحل.</div>` : "";
   return `
-    <div class="order-box">
-      <div><strong>رقم الطلب:</strong> ${escapeHtml(orderKey)}</div>
-      <div style="margin-top:6px;"><strong>الحالة الحالية:</strong> ${getStatusBadgeHtml(statusText)}</div>
-      <div><strong>الإجمالي:</strong> ${escapeHtml(found.total ?? 0)} جنيه</div>
-      ${itemsText ? `<div style="margin-top:4px;color:var(--muted);"><strong>الأصناف:</strong> ${itemsText}</div>` : ""}
+    <div class="ord-card">
+      <div class="ord-head"><span class="ord-code">${escapeHtml(orderKey)}</span>${getStatusBadgeHtml(statusText)}</div>
+      ${steps}
+      ${rows}
+      ${unNote}
+      <div class="ord-total"><span>الإجمالي</span><span>${escapeHtml(orderTotal(found))} جنيه</span></div>
       ${actionsHtml}
     </div>`;
 }

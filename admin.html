@@ -39,6 +39,36 @@
   .item-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
   .item-card.unavailable { background: #fef2f2; border-color: #fecaca; opacity: 0.92; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .ao-card { background:#fff; border:1px solid var(--border); border-right:5px solid #2563eb; border-radius:14px; padding:12px; margin-top:10px; display:grid; gap:8px; box-shadow:0 2px 8px rgba(15,23,42,.06); }
+  .ao-card.st-del { border-right-color:#f59e0b; } .ao-card.st-done { border-right-color:#16a34a; } .ao-card.st-cancel { border-right-color:#dc2626; opacity:.85; }
+  .ao-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ao-code { font-weight:900; font-size:14px; direction:ltr; }
+  .ao-cust { background:#f1f5f9; border-radius:10px; padding:8px 10px; font-size:13px; display:grid; gap:3px; }
+  .ao-line { display:flex; justify-content:space-between; gap:8px; font-size:13px; padding:4px 0; border-bottom:1px dashed var(--border); }
+  .ao-line.un > span:first-child { text-decoration:line-through; opacity:.7; } .un-tag { display:inline-block; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; border-radius:999px; font-size:11px; font-weight:800; padding:1px 8px; }
+  .ao-line button { padding:3px 8px; font-size:11px; margin-inline-start:6px; }
+
+  #printArea { display:none; }
+  @media print {
+    @page { margin: 8mm; }
+    body > *:not(#printArea) { display:none !important; }
+    body { background:#fff !important; padding:0 !important; }
+    #printArea { display:block !important; direction:rtl; color:#000; font-size:13px; font-family:system-ui,Tahoma,Arial,sans-serif; }
+    #printArea .pr-logo { text-align:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    #printArea h1 { font-size:20px; margin:0 0 2px; text-align:center; }
+    #printArea .pr-sub { text-align:center; margin-bottom:8px; font-size:12px; }
+    #printArea table { width:100%; border-collapse:collapse; margin:8px 0; }
+    #printArea th, #printArea td { border-bottom:1px solid #000; padding:4px 2px; text-align:right; }
+    #printArea td.n, #printArea th.n { text-align:left; white-space:nowrap; }
+    #printArea tr.un td:first-child { text-decoration:line-through; }
+    #printArea .pr-total { display:flex; justify-content:space-between; font-weight:900; font-size:16px; margin-top:6px; }
+    #printArea .pr-meta div { margin:2px 0; }
+  }
+  .ao-total { display:flex; justify-content:space-between; font-weight:900; font-size:16px; }
+  .ao-stbtns { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .ao-stbtns button { padding:8px 4px; font-size:12px; }
+  .ao-stbtns button.cur { outline:3px solid #0f172a; outline-offset:1px; }
   .badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #eff6ff; color: var(--accent); }
   .badge-unavail { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
   .badge-avail { background: #dcfce7; color: #166534; }
@@ -73,12 +103,13 @@
   </div>
 </div>
 
+<div id="printArea" aria-hidden="true"></div>
 <div id="adminApp" style="display:none;">
   <header>
     <h1>إدارة محلات نبيل عبد العال</h1>
     <div class="header-tools">
-      <button id="enableRingBtn" type="button" class="btn-warn" style="padding:6px 12px;font-size:12px;">🔔 تفعيل رنة الطلبات</button>
-      <span id="ringStatusBadge" class="ring-indicator active">الرنة: مفعّلة ✓</span>
+      <button id="enableRingBtn" type="button" class="btn-warn" style="padding:6px 12px;font-size:12px;">إيقاف الرنة</button>
+      <span id="ringStatusBadge" class="ring-indicator">الرنة: ...</span>
       <button id="logoutBtn" type="button" class="btn-outline" style="padding:6px 12px;font-size:12px;">خروج</button>
     </div>
   </header>
@@ -151,7 +182,16 @@
       <h2 style="margin-top:0;font-size:17px;">العروض اليومية</h2>
       <form id="offerForm" class="row" style="margin-bottom:12px;">
         <input id="offerTitle" type="text" placeholder="عنوان العرض (مثال: عرض زيت 5 لتر)" style="flex:2;min-width:200px;" required />
-        <input id="offerPrice" type="text" placeholder="السعر أو الخصم (اختياري)" style="flex:1;min-width:140px;" />
+        <input id="offerPrice" type="text" placeholder="نص السعر أو الخصم للشريط (اختياري)" style="flex:1;min-width:140px;" />
+        <div style="flex-basis:100%;border:1px dashed #19376d;border-radius:10px;padding:10px;background:#eef3ff;display:grid;gap:8px;">
+          <strong style="color:#19376d;">باكدج بسعر عرض (اختياري): منتجات + سعر إجمالي تحدده أنت</strong>
+          <div id="bundleRows" style="display:grid;gap:6px;"></div>
+          <button type="button" id="addBundleRow" class="btn-outline" style="width:auto;">+ أضف منتج للباكدج</button>
+          <input id="bundlePrice" type="number" min="1" step="0.01" placeholder="سعر الباكدج الإجمالي بالجنيه" />
+          <div id="bundleSumInfo" style="font-size:13px;color:#0b2447;"></div>
+          <label style="font-size:13px;">صورة العرض (مطلوبة للباكدج): <input id="offerImage" type="file" accept="image/*" /></label>
+          <div id="offerImgInfo" style="font-size:12px;color:var(--muted);"></div>
+        </div>
         <button type="submit" class="btn-accent">إضافة عرض</button>
       </form>
       <div id="offersList" class="grid-2"></div>
@@ -224,13 +264,21 @@ function escapeHtml(str) {
 
 function updateRingBadge() {
   const badge = document.getElementById("ringStatusBadge");
+  const btn = document.getElementById("enableRingBtn");
   if (!badge) return;
-  if (adminState.soundEnabled) {
-    badge.textContent = "الرنة: مفعّلة ✓";
-    badge.classList.add("active");
-  } else {
+  const running = !!(adminState.audioCtx && adminState.audioCtx.state === "running");
+  if (!adminState.soundEnabled) {
     badge.textContent = "الرنة: متوقفة";
     badge.classList.remove("active");
+    if (btn) btn.textContent = "تشغيل الرنة";
+  } else if (running) {
+    badge.textContent = "الرنة: شغالة ✓";
+    badge.classList.add("active");
+    if (btn) btn.textContent = "إيقاف الرنة";
+  } else {
+    badge.textContent = "الرنة: اضغط أي مكان في الصفحة لتشغيل الصوت";
+    badge.classList.remove("active");
+    if (btn) btn.textContent = "إيقاف الرنة";
   }
 }
 
@@ -240,10 +288,13 @@ function unlockAudioContext() {
     if (!AudioContextClass) return;
     if (!adminState.audioCtx) {
       adminState.audioCtx = new AudioContextClass();
+      adminState.audioCtx.onstatechange = updateRingBadge;
     }
     if (adminState.audioCtx.state === "suspended") {
-      adminState.audioCtx.resume();
+      const pr = adminState.audioCtx.resume();
+      if (pr && pr.then) pr.then(updateRingBadge, updateRingBadge);
     }
+    updateRingBadge();
   } catch {}
 }
 
@@ -252,12 +303,8 @@ function playOrderRing() {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
-    if (!adminState.audioCtx) {
-      adminState.audioCtx = new AudioContextClass();
-    }
-    if (adminState.audioCtx.state === "suspended") {
-      adminState.audioCtx.resume();
-    }
+    unlockAudioContext();
+    if (!adminState.audioCtx) return;
     const now = adminState.audioCtx.currentTime;
     const notes = [880, 1174.66, 880, 1174.66, 1318.51];
     notes.forEach((freq, idx) => {
@@ -282,7 +329,7 @@ async function triggerNewOrderAlert(newOrders) {
     newOrders.forEach(ord => {
       try {
         new Notification("طلب جديد - محلات نبيل عبد العال", {
-          body: `رقم الطلب: ${ord._key || ord.id || ""} • العميل: ${ord.customerName || ""} • الإجمالي: ${ord.total ?? 0} جنيه`
+          body: `رقم الطلب: ${ord._key || ord.id || ""} • العميل: ${ord.customerName || ""} • الإجمالي: ${orderTotal(ord)} جنيه`
         });
       } catch {}
     });
@@ -307,11 +354,20 @@ document.addEventListener("pointerdown", () => {
   }
 }, { passive: true });
 
+// قراءة بالـ ETag: لو ما اتغيّرش حاجة السيرفر يرد 304 بدون محتوى فنوفّر تحميل الكتالوج الكبير كل 5 ثواني.
+const ETAG_CACHE = {};
 async function fetchJson(path) {
   const sep = path.includes("?") ? "&" : "?";
-  const res = await fetch(await authUrl(`${path}${sep}_t=${Date.now()}`), { cache: "no-store" });
+  const cached = ETAG_CACHE[path];
+  const headers = { "X-Firebase-ETag": "true" };
+  if (cached) headers["If-None-Match"] = cached.etag;
+  const res = await fetch(await authUrl(`${path}${sep}_t=${Date.now()}`), { cache: "no-store", headers });
+  if (res.status === 304 && cached) return JSON.parse(cached.text);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  const text = await res.text();
+  const etag = res.headers.get("ETag");
+  if (etag) ETAG_CACHE[path] = { etag, text };
+  return JSON.parse(text);
 }
 
 async function putJson(path, data) {
@@ -323,6 +379,76 @@ async function putJson(path, data) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+async function patchJson(path, data) {
+  const res = await fetch(await authUrl(path), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function orderItemsList(o) {
+  const it = o && o.items;
+  if (Array.isArray(it)) return it.filter(x => x && typeof x === "object");
+  if (it && typeof it === "object") return Object.values(it).filter(x => x && typeof x === "object");
+  return [];
+}
+// الإجمالي دايماً من الأصناف (سعر الطلب × الكمية)، مش من رقم total المخزّن
+function orderBundlesList(o) {
+  const b = o && o.bundles;
+  return (b && typeof b === "object") ? Object.values(b).filter(x => x && typeof x === "object") : [];
+}
+// أسطر الطلب اللي المحل علّمها "غير متوفر": المفتاح i_<معرف المنتج> أو b_<معرف العرض>. الطلب الأصلي بيفضل زي ما هو، والإجمالي بيتحسب بعد خصم السطر.
+function orderUnavail(o) { const u = o && o.unavailable; return (u && typeof u === "object") ? u : {}; }
+function lineKey(kind, line) { return (kind === "b" ? "b_" : "i_") + String(line && line.id); }
+function lineIsUnavail(o, kind, line) { return orderUnavail(o)[lineKey(kind, line)] === true; }
+function orderGross(o) {
+  return orderItemsList(o).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0)
+    + orderBundlesList(o).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+}
+function orderDeducted(o) {
+  return orderItemsList(o).filter(i => lineIsUnavail(o, "i", i)).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0)
+    + orderBundlesList(o).filter(b => lineIsUnavail(o, "b", b)).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+}
+function orderTotal(o) { return orderGross(o) - orderDeducted(o); }
+function orderBundlesText(o) {
+  // أسماء المكونات من كتالوج المنتجات بالكود؛ الكميات والسعر متطابقة مع العرض وقت الطلب (القواعد بتفرض ده)
+  const nm = id => { const p = adminState.products.find(x => x.id === id); return p ? p.name : `منتج محذوف (${id})`; };
+  return orderBundlesList(o).map(b => {
+    const its = (b.items && typeof b.items === "object") ? Object.values(b.items).filter(i => i && typeof i === "object") : [];
+    return `عرض ${escapeHtml(b.title)} (${escapeHtml(b.qty)} × ${escapeHtml(b.price)}): ` + its.map(i => `${escapeHtml(i.qty)}× ${escapeHtml(nm(i.id))}`).join("، ");
+  });
+}
+
+
+function printInvoice(oid) {
+  const o = adminState.orders.find(x => String(x._key || x.id || x.orderCode) === oid);
+  if (!o) return;
+  const money = n => String(Number(n) || 0);
+  const rowsI = orderItemsList(o).map(i => { const un = lineIsUnavail(o, "i", i); return `<tr class="${un ? "un" : ""}"><td>${escapeHtml(i.name)}${un ? " (غير متوفر)" : ""}</td><td class="n">${escapeHtml(i.qty)}</td><td class="n">${money(i.price)}</td><td class="n">${un ? "0" : money((Number(i.price) || 0) * (Number(i.qty) || 0))}</td></tr>`; });
+  const rowsB = orderBundlesList(o).map(b => { const un = lineIsUnavail(o, "b", b); const its = (b.items && typeof b.items === "object") ? Object.values(b.items).filter(i => i && typeof i === "object").map(i => `${escapeHtml(i.qty)}× ${escapeHtml((adminState.products.find(p => p.id === i.id) || {}).name || "منتج محذوف (" + i.id + ")")}`).join("، ") : ""; return `<tr class="${un ? "un" : ""}"><td>عرض: ${escapeHtml(b.title)}${un ? " (غير متوفر)" : ""}<div style="font-size:11px;">${its}</div></td><td class="n">${escapeHtml(b.qty)}</td><td class="n">${money(b.price)}</td><td class="n">${un ? "0" : money((Number(b.price) || 0) * (Number(b.qty) || 0))}</td></tr>`; });
+  const when = o.createdAt ? new Date(o.createdAt).toLocaleString("ar-EG") : (Number(o.timestamp) > 1e12 ? new Date(Number(o.timestamp)).toLocaleString("ar-EG") : "");
+  const ded = orderDeducted(o);
+  document.getElementById("printArea").innerHTML = `
+    <div class="pr-logo"><svg viewBox="0 0 100 100" width="64" height="64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#000"/><circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="2.5"/><text x="50" y="68" text-anchor="middle" font-size="58" font-weight="900" fill="#fff" font-family="Arial,Helvetica,sans-serif">N</text></svg></div>
+    <h1>محلات نبيل عبد العال</h1>
+    <div class="pr-sub">فاتورة طلب</div>
+    <div class="pr-meta">
+      <div><strong>رقم الطلب:</strong> <span dir="ltr">${escapeHtml(String(o._key || o.id || ""))}</span></div>
+      ${when ? `<div><strong>التاريخ:</strong> ${escapeHtml(when)}</div>` : ""}
+      <div><strong>العميل:</strong> ${escapeHtml(o.customerName || "")} — ${escapeHtml(o.customerPhone || o.phone || "")}</div>
+      <div><strong>العنوان:</strong> ${escapeHtml(o.address || "")}</div>
+      ${o.notes ? `<div><strong>ملاحظات:</strong> ${escapeHtml(o.notes)}</div>` : ""}
+    </div>
+    <table><thead><tr><th>الصنف</th><th class="n">الكمية</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody>${rowsI.concat(rowsB).join("")}</tbody></table>
+    ${ded > 0 ? `<div class="pr-meta"><div>إجمالي الأصناف: ${money(orderGross(o))} جنيه</div><div>خصم الأصناف غير المتوفرة: ${money(ded)} جنيه</div></div>` : ""}
+    <div class="pr-total"><span>الإجمالي المطلوب</span><span>${money(orderTotal(o))} جنيه</span></div>`;
+  window.print();
+}
+window.printInvoice = printInvoice;
 
 async function deleteJson(path) {
   const res = await fetch(await authUrl(path), { method: "DELETE" });
@@ -561,6 +687,7 @@ function renderProductsAdmin() {
         hidden: !nextAvail
       };
       await putJson(`/products/${encodeURIComponent(id)}.json`, updated);
+      if (!nextAvail) await pauseOffersUsing(id);
       await loadAllAdminData();
     });
   });
@@ -569,6 +696,7 @@ function renderProductsAdmin() {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-del-p");
       await deleteJson(`/products/${encodeURIComponent(id)}.json`);
+      await pauseOffersUsing(id);
       await loadAllAdminData();
     });
   });
@@ -593,6 +721,7 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
     updatedAt: Date.now()
   };
   await putJson(`/products/${encodeURIComponent(id)}.json`, payload);
+  if (!availChecked) await pauseOffersUsing(id);
   document.getElementById("productForm").reset();
   document.getElementById("prodId").value = "";
   document.getElementById("prodAvailable").checked = true;
@@ -623,25 +752,23 @@ function renderOrdersAdmin() {
   }
   el.innerHTML = adminState.orders.map(o => {
     const oid = String(o._key || o.id || o.orderCode || "");
-    const itemsText = Array.isArray(o.items)
-      ? o.items.map(i => `${escapeHtml(i.name)} (${i.qty})`).join("، ")
-      : "";
+    const itemsText = orderItemsList(o)
+      .map(i => `${escapeHtml(i.name)} (${escapeHtml(i.qty)} × ${escapeHtml(i.price ?? "?")})`).concat(orderBundlesText(o)).join("، ");
+    const stt = String(o.status || "قيد التجهيز");
+    const cls = stt.includes("ملغ") ? "st-cancel" : (stt.includes("تسليم") && !stt.includes("توصيل")) ? "st-done" : stt.includes("توصيل") ? "st-del" : "";
+    const unBtn = (kind, ln, un) => `<button type="button" class="${un ? "btn-outline" : "btn-warn"}" data-un="${escapeHtml(oid)}|${escapeHtml(lineKey(kind, ln))}|${un ? "0" : "1"}">${un ? "إرجاع" : "غير متوفر"}</button>`;
+    const lines = orderItemsList(o).map(i => { const un = lineIsUnavail(o, "i", i); return `<div class="ao-line ${un ? "un" : ""}"><span>${escapeHtml(i.name)} <small style="color:var(--muted);">${escapeHtml(i.price ?? "?")} × ${escapeHtml(i.qty)}</small> ${un ? `<span class="un-tag">غير متوفر</span>` : ""}</span><span><b>${(Number(i.price) || 0) * (Number(i.qty) || 0)}</b>${unBtn("i", i, un)}</span></div>`; }).join("")
+      + orderBundlesList(o).map(b => { const un = lineIsUnavail(o, "b", b); return `<div class="ao-line ${un ? "un" : ""}"><span>${orderBundlesText({ bundles: { x: b } })[0]} ${un ? `<span class="un-tag">العرض كله غير متوفر</span>` : ""}</span><span><b>${(Number(b.price) || 0) * (Number(b.qty) || 0)}</b>${unBtn("b", b, un)}</span></div>`; }).join("");
+    const ded = orderDeducted(o);
+    const btn = (st, c) => `<button type="button" class="${c} ${stt === st ? "cur" : ""}" data-st="${escapeHtml(oid)}|${st}">${st}</button>`;
     return `
-      <div class="item-card">
-        <div class="row" style="justify-content:space-between;">
-          <strong>${escapeHtml(oid)}</strong>
-          <span class="badge">${escapeHtml(o.status || "قيد التجهيز")}</span>
-        </div>
-        <div><strong>العميل:</strong> ${escapeHtml(o.customerName || "")} — ${escapeHtml(o.customerPhone || o.phone || "")}</div>
-        <div><strong>العنوان:</strong> ${escapeHtml(o.address || "")}</div>
-        ${itemsText ? `<div style="font-size:13px;color:var(--muted);"><strong>الأصناف:</strong> ${itemsText}</div>` : ""}
-        <div><strong>الإجمالي:</strong> ${escapeHtml(o.total ?? 0)} جنيه</div>
-        <div class="row">
-          <button type="button" class="btn-outline" data-st="${escapeHtml(oid)}|قيد التجهيز" style="padding:6px 10px;font-size:12px;">قيد التجهيز</button>
-          <button type="button" class="btn-accent" data-st="${escapeHtml(oid)}|قيد التوصيل" style="padding:6px 10px;font-size:12px;">قيد التوصيل</button>
-          <button type="button" class="btn-ok" data-st="${escapeHtml(oid)}|تم التسليم" style="padding:6px 10px;font-size:12px;">تم التسليم</button>
-          <button type="button" class="btn-danger" data-del-ord="${escapeHtml(oid)}" style="padding:6px 10px;font-size:12px;">حذف الطلب</button>
-        </div>
+      <div class="ao-card ${cls}">
+        <div class="ao-head"><span class="ao-code">${escapeHtml(oid)}</span><span class="badge">${escapeHtml(stt)}</span></div>
+        <div class="ao-cust"><div><strong>${escapeHtml(o.customerName || "")}</strong> — ${escapeHtml(o.customerPhone || o.phone || "")}</div><div>${escapeHtml(o.address || "")}</div>${o.notes ? `<div style="color:var(--muted);">ملاحظات: ${escapeHtml(o.notes)}</div>` : ""}</div>
+        <div>${lines}</div>
+        <div class="ao-total"><span>${ded > 0 ? "بعد الخصم" : "الإجمالي"}</span><span>${ded > 0 ? `<s style="color:var(--muted);font-weight:400;">${escapeHtml(orderGross(o))}</s> ` : ""}${escapeHtml(orderTotal(o))} جنيه</span></div>
+        <div class="ao-stbtns">${btn("قيد التجهيز","btn-outline")}${btn("قيد التوصيل","btn-accent")}${btn("تم التسليم","btn-ok")}</div>
+        <div class="row"><button type="button" class="btn-outline" data-print="${escapeHtml(oid)}" style="padding:6px 10px;font-size:12px;">طباعة الفاتورة</button><button type="button" class="btn-danger" data-del-ord="${escapeHtml(oid)}" style="padding:6px 10px;font-size:12px;">حذف الطلب</button></div>
       </div>
     `;
   }).join("");
@@ -651,12 +778,22 @@ function renderOrdersAdmin() {
       const [oid, st] = btn.getAttribute("data-st").split("|");
       const target = adminState.orders.find(x => String(x._key || x.id || x.orderCode) === oid);
       if (!target) return;
-      const copy = { ...target, status: st, updatedAt: Date.now() };
-      delete copy._key;
-      await putJson(`/orders/${encodeURIComponent(oid)}.json`, copy);
+      // تعديل الحالة فقط (مش إعادة كتابة الطلب كله): يحفظ أسعار الطلب وقت إنشائه ولا يمسح تعديلات أخرى
+      await patchJson(`/orders/${encodeURIComponent(oid)}.json`, { status: st, updatedAt: Date.now() });
       await loadAllAdminData();
     });
   });
+
+  el.querySelectorAll("[data-un]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const [oid, key, on] = btn.getAttribute("data-un").split("|");
+      const path = `/orders/${encodeURIComponent(oid)}/unavailable/${encodeURIComponent(key)}.json`;
+      if (on === "1") await putJson(path, true); else await deleteJson(path);
+      await loadAllAdminData();
+    });
+  });
+
+  el.querySelectorAll("[data-print]").forEach(btn => btn.addEventListener("click", () => printInvoice(btn.getAttribute("data-print"))));
 
   el.querySelectorAll("[data-del-ord]").forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -682,23 +819,114 @@ document.getElementById("deleteDeliveredOrdersBtn").addEventListener("click", as
 
 document.getElementById("refreshOrdersBtn").addEventListener("click", () => loadAllAdminData());
 
+function bundleRowsData() {
+  return Array.from(document.querySelectorAll("#bundleRows .brow")).map(r => ({
+    pid: r.querySelector("select").value, qty: Number(r.querySelector("input").value)
+  })).filter(x => x.pid);
+}
+function updateBundleSumInfo() {
+  const rows = bundleRowsData();
+  const sum = rows.reduce((s, r) => { const p = adminState.products.find(x => x.id === r.pid); return s + (p ? Number(p.price) * (r.qty || 0) : 0); }, 0);
+  const price = Number(document.getElementById("bundlePrice").value);
+  document.getElementById("bundleSumInfo").textContent = rows.length
+    ? `مجموع أسعار المنتجات حالياً: ${sum} جنيه` + (price > 0 ? (price < sum ? ` • التوفير للعميل: ${sum - price} جنيه` : " • تنبيه: سعر الباكدج مش أقل من المجموع") : "")
+    : "";
+}
+function addBundleRow() {
+  const wrap = document.getElementById("bundleRows");
+  if (wrap.querySelectorAll(".brow").length >= 6) return;
+  const div = document.createElement("div");
+  div.className = "brow row";
+  div.innerHTML = `<select style="flex:2;min-width:150px;">${adminState.products.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${escapeHtml(p.price)} جنيه)</option>`).join("")}</select>
+    <input type="number" min="1" max="50" step="1" value="1" style="width:80px;" />
+    <button type="button" class="btn-danger" style="padding:6px 10px;">حذف</button>`;
+  div.querySelector("button").onclick = () => { div.remove(); updateBundleSumInfo(); };
+  div.querySelector("select").onchange = updateBundleSumInfo;
+  div.querySelector("input").oninput = updateBundleSumInfo;
+  wrap.appendChild(div);
+  updateBundleSumInfo();
+}
+document.getElementById("addBundleRow").addEventListener("click", addBundleRow);
+document.getElementById("bundlePrice").addEventListener("input", updateBundleSumInfo);
+
+// ضغط الصورة قبل الحفظ عشان ما تكبّرش قاعدة البيانات (أقصى عرض 700px، جودة 0.7)
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, 700 / img.width);
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.7));
+    };
+    img.onerror = () => reject(new Error("bad image"));
+    img.src = url;
+  });
+}
+
+// لما منتج يتوقف أو يتحذف: بنوقف تلقائياً أي عرض باكدج فيه (القواعد كمان بترفض الطلب لو مكوّن مش متاح)
+async function pauseOffersUsing(pid) {
+  const hit = adminState.offers.filter(o => o.bundle && o.active !== false &&
+    (Array.isArray(o.bundle.lines) ? o.bundle.lines : Object.values(o.bundle.lines || {})).some(l => l && l.pid === pid));
+  for (const o of hit) await putJson(`/offers/${encodeURIComponent(o._key)}/active.json`, false);
+  return hit.length;
+}
+
 function renderOffersAdmin() {
   const el = document.getElementById("offersList");
   if (!adminState.offers.length) {
     el.innerHTML = `<div style="color:var(--muted);">لا توجد عروض يومية حالياً.</div>`;
     return;
   }
-  el.innerHTML = adminState.offers.map(o => `
-    <div class="item-card">
+  el.innerHTML = adminState.offers.map(o => {
+    const b = o.bundle && typeof o.bundle === "object" ? o.bundle : null;
+    const lines = b ? (Array.isArray(b.lines) ? b.lines : Object.values(b.lines || {})) : [];
+    const items = lines.map(l => {
+      const p = adminState.products.find(x => x.id === l.pid);
+      return `${escapeHtml(l.qty)}× ${escapeHtml(p ? p.name : l.pid)}`;
+    }).join("، ");
+    return `
+    <div class="item-card ${o.active === false ? "unavailable" : ""}">
+      ${o.image ? `<img src="${escapeHtml(o.image)}" alt="" style="width:100%;max-height:130px;object-fit:cover;border-radius:8px;" />` : ""}
       <strong>${escapeHtml(o.title)}</strong>
-      ${o.price ? `<div style="color:var(--accent);font-weight:700;">${escapeHtml(o.price)} جنيه</div>` : ""}
-      <button type="button" class="btn-danger" data-del-off="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">حذف العرض</button>
-    </div>
-  `).join("");
+      ${o.price ? `<div style="color:var(--accent);font-weight:700;">${escapeHtml(o.price)}</div>` : ""}
+      ${b ? `<div style="color:#19376d;font-weight:800;">باكدج: ${escapeHtml(b.price)} جنيه</div><div style="font-size:13px;color:var(--muted);">${items}</div>${o.active === false ? `<div style="color:#b91c1c;font-size:12px;">العرض موقوف ومش ظاهر للعملاء</div>` : ""}` : ""}
+      <div class="row">
+        ${b ? `<button type="button" class="btn-outline" data-off-price="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">تعديل سعر الباكدج</button>
+        <button type="button" class="btn-outline" data-off-toggle="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">${o.active === false ? "تفعيل" : "إيقاف"}</button>` : ""}
+        <button type="button" class="btn-danger" data-del-off="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">حذف العرض</button>
+      </div>
+    </div>`;
+  }).join("");
 
   el.querySelectorAll("[data-del-off]").forEach(btn => {
     btn.addEventListener("click", async () => {
       await deleteJson(`/offers/${encodeURIComponent(btn.getAttribute("data-del-off"))}.json`);
+      await loadAllAdminData();
+    });
+  });
+  el.querySelectorAll("[data-off-price]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const key = btn.getAttribute("data-off-price");
+      const v = Number(prompt("سعر الباكدج الجديد بالجنيه:"));
+      if (!Number.isFinite(v) || v <= 0) return;
+      await putJson(`/offers/${encodeURIComponent(key)}/bundle/price.json`, v);
+      await loadAllAdminData();
+    });
+  });
+  el.querySelectorAll("[data-off-toggle]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const key = btn.getAttribute("data-off-toggle");
+      const o = adminState.offers.find(x => x._key === key);
+      if (o && o.active === false) {
+        const lines = Array.isArray(o.bundle.lines) ? o.bundle.lines : Object.values(o.bundle.lines || {});
+        const bad = lines.filter(l => { const p = adminState.products.find(x => x.id === l.pid); return !p || !isProductAvailable(p); });
+        if (bad.length) { alert("مينفعش تفعّل العرض: فيه منتج متوقف أو محذوف."); return; }
+      }
+      await putJson(`/offers/${encodeURIComponent(key)}/active.json`, o && o.active === false);
       await loadAllAdminData();
     });
   });
@@ -707,12 +935,36 @@ function renderOffersAdmin() {
 document.getElementById("offerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const id = "OFF-" + Date.now();
-  await putJson(`/offers/${encodeURIComponent(id)}.json`, {
+  const data = {
     id,
     title: document.getElementById("offerTitle").value.trim(),
-    price: document.getElementById("offerPrice").value.trim()
-  });
+    price: document.getElementById("offerPrice").value.trim(),
+    createdAt: Date.now(),
+    active: true
+  };
+  const rows = bundleRowsData();
+  const bprice = Number(document.getElementById("bundlePrice").value);
+  const info = document.getElementById("offerImgInfo");
+  if (rows.length || bprice > 0) {
+    const ids = rows.map(r => r.pid);
+    if (!rows.length || !(bprice > 0) || new Set(ids).size !== ids.length || rows.length > 6 || rows.some(r => !Number.isInteger(r.qty) || r.qty < 1 || r.qty > 50)) {
+      info.style.color = "#b91c1c";
+      info.textContent = "الباكدج محتاج: من 1 إلى 6 منتجات بدون تكرار، كمية صحيحة من 1 لـ 50، وسعر إجمالي أكبر من صفر.";
+      return;
+    }
+    data.bundle = { price: bprice, lines: rows.map(r => ({ pid: r.pid, qty: r.qty })) };
+  }
+  const f = document.getElementById("offerImage").files[0];
+  if (data.bundle && !f) { info.style.color = "#b91c1c"; info.textContent = "ضيف صورة للباكدج الأول (من «صورة العرض»)، العرض بالصورة أوضح للعميل."; return; }
+  if (f) {
+    try { data.image = await compressImage(f); }
+    catch { info.style.color = "#b91c1c"; info.textContent = "تعذر قراءة الصورة. جرّب صورة تانية."; return; }
+    if (data.image.length > 150000) { info.style.color = "#b91c1c"; info.textContent = "الصورة كبيرة بعد الضغط. اختار صورة أبسط."; return; }
+  }
+  await putJson(`/offers/${encodeURIComponent(id)}.json`, data);
   document.getElementById("offerForm").reset();
+  document.getElementById("bundleRows").innerHTML = "";
+  info.textContent = ""; updateBundleSumInfo();
   await loadAllAdminData();
 });
 
