@@ -308,14 +308,44 @@
   .st-cancel { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
   .order-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .order-actions button { width: auto; flex: 1; min-width: 120px; padding: 9px 12px; font-size: 13px; }
+
+  /* ===== تحسينات الموبايل والوضوح ===== */
+  body { padding-bottom: 96px; }
+  .brand-badge { display: none; }
+  .brand { font-size: 19px; }
+  .header-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .support-link { width:auto; background: rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(251,191,36,0.5); padding:7px 12px; border-radius:999px; font-size:12.5px; white-space:nowrap; }
+  header { padding: 12px 16px 14px; }
+  .promo-banner { display:none; }
+  .daily-ticker { margin-bottom: 10px; }
+  .features { display:flex; gap:8px; overflow-x:auto; margin-bottom:10px; padding-bottom:2px; }
+  .feat-card { flex:0 0 auto; padding:7px 12px; border-radius:999px; border-right-width:1px; }
+  .feat-sub { display:none; }
+  .feat-title { margin:0; font-size:12.5px; white-space:nowrap; }
+  .ticker-track bdi { unicode-bidi: isolate; }
+  .p-name { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.6em; line-height:1.3; }
+  .p-desc { font-size:12px; color:var(--muted); margin-top:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .cat-heading { grid-column:1/-1; margin:8px 0 0; font-size:15px; font-weight:800; color:var(--navy); border-bottom:2px solid var(--gold-soft); padding-bottom:4px; }
+  .cart-fab {
+    left:12px; right:12px; bottom:12px; width:auto; height:auto; border-radius:14px; padding:12px 16px;
+    justify-content:space-between; gap:10px; font-size:15px; font-weight:800;
+  }
+  .cart-fab .cart-label { display:flex; align-items:center; gap:8px; }
+  .cart-fab .cart-total-label { color:#fcd34d; font-weight:900; }
+  .cart-badge { position:static; border:none; }
+  .support-fab { display:none; }
+  @media (min-width: 680px) { .cart-fab { left:50%; right:auto; transform:translateX(-50%); width:min(560px, calc(100% - 24px)); } }
+  .req-note { margin-top:8px; font-size:12px; color:var(--muted); }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <span class="brand-badge">★ سوبر ماركت متكامل • توصيل سريع</span>
-    <div class="brand">محلات نبيل عبد العال</div>
+    <div class="header-top">
+      <div class="brand">محلات نبيل عبد العال</div>
+      <button id="supportFab" type="button" class="support-link">شكاوى واستفسار</button>
+    </div>
     <div class="slogan">مع محلات نبيل عبد العال عمرك ما هتنام جعان</div>
   </div>
 </header>
@@ -333,7 +363,7 @@
 
   <!-- بنر متحرك للعروض اليومية -->
   <section class="daily-ticker" aria-label="العروض اليومية">
-    <span class="ticker-badge">🔥 عروض اليوم</span>
+    <span class="ticker-badge">عروض اليوم</span>
     <div class="ticker-viewport">
       <div id="dailyOffersTrack" class="ticker-track">
         <span>عروض يومية متجددة في محلات نبيل عبد العال • أسعار مميزة على السلع الأساسية والزيوت والسمنات</span>
@@ -344,19 +374,20 @@
 
   <section class="features">
     <div class="feat-card">
-      <div class="feat-title">🛒 تشكيلة سوبر ماركت متكاملة</div>
+      <div class="feat-title">تشكيلة سوبر ماركت متكاملة</div>
       <div class="feat-sub">سلع يومية، زيوت، سمن، معلبات، منظفات وألبان</div>
     </div>
     <div class="feat-card">
-      <div class="feat-title">⚡ تحديث فوري للمنتجات</div>
+      <div class="feat-title">تحديث فوري للمنتجات</div>
       <div class="feat-sub">أي منتج أو سعر يُضاف أو يُعدّل يظهر للعملاء مباشرة</div>
     </div>
     <div class="feat-card">
-      <div class="feat-title">🚚 تتبع الطلب لحظة بلحظة</div>
+      <div class="feat-title">التوصيل: الزقازيق والمناطق المجاورة فقط</div>
       <div class="feat-sub">قيد التجهيز • قيد التوصيل • تم التسليم</div>
     </div>
   </section>
 
+  <div id="setupBanner" class="error-banner" style="display:none;">الطلبات متوقفة مؤقتًا: إعداد الأمان في الموقع لسه ما اكتملش (مفتاح Firebase ناقص). تقدر تتصفح المنتجات بس.</div>
   <div id="dbErrorBanner" class="error-banner"></div>
 
   <section class="panel">
@@ -375,24 +406,20 @@
   </section>
 
   <section class="panel">
-    <h2 class="section-title" style="margin-bottom:6px;">📦 متابعة طلبك بنفسك</h2>
+    <h2 class="section-title" style="margin-bottom:6px;">طلباتي على هذا الجهاز</h2>
     <p style="margin:0 0 10px;font-size:13px;color:var(--muted);">
-      أدخل رقم الطلب (مثال: ORD-1001) أو رقم الهاتف المسجل في الطلب لمعرفة الحالة الفورية أو تعديل/إلغاء الطلب قبل بدء التوصيل.
+      بتشوف هنا الطلبات اللي عملتها من نفس الجهاز والمتصفح بس. لو مسحت بيانات المتصفح أو عملت الطلب من جهاز تاني، ابعت استفسار للمحل برقم الطلب.
     </p>
-    <div style="display:flex;gap:8px;">
-      <input id="trackInput" type="text" placeholder="رقم الطلب أو رقم الموبايل..." />
-      <button id="trackBtn" type="button" class="btn-primary" style="width:auto;padding:10px 18px;">بحث</button>
-    </div>
+    <button id="trackBtn" type="button" class="btn-primary">تحديث حالة طلباتي</button>
     <div id="trackResult"></div>
   </section>
 </main>
 
 <button id="cartFab" type="button" class="cart-fab" aria-label="السلة">
-  🛒
-  <span id="cartBadge" class="cart-badge">0</span>
+  <span class="cart-label"><svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 11.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 2-1.5L21 7H6"/></svg> <span>السلة</span> <span id="cartBadge" class="cart-badge">0</span> <span id="cartCountText">صنف</span></span>
+  <span id="cartBarTotal" class="cart-total-label">0 جنيه</span>
 </button>
 
-<button id="supportFab" type="button" class="support-fab">💬 شكاوى واستفسار</button>
 
 <!-- نافذة السلة وإتمام الطلب -->
 <div id="cartModal" class="modal-backdrop">
@@ -403,28 +430,15 @@
     </div>
     <div id="cartItems"></div>
     <div id="cartTotal" style="font-weight:800;font-size:16px;color:var(--navy);margin:12px 0;">الإجمالي: 0 جنيه</div>
+    <div class="order-box" style="margin:0 0 10px;">التوصيل داخل الزقازيق والمناطق المجاورة فقط.</div>
     <form id="orderForm" style="display:grid;gap:10px;">
       <input id="custName" type="text" placeholder="الاسم بالكامل" required />
       <input id="custPhone" type="tel" placeholder="رقم الموبايل" required />
-      <input id="custAddress" type="text" placeholder="العنوان بالتفصيل" required />
+      <input id="custAddress" type="text" placeholder="العنوان بالتفصيل (داخل الزقازيق والمناطق المجاورة)" required />
       <textarea id="custNotes" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
       <button type="submit" class="btn-accent">تأكيد الطلب</button>
     </form>
     <div id="orderStatus" class="status-msg"></div>
-  </div>
-</div>
-
-<!-- نافذة تعديل الطلب للعميل -->
-<div id="editOrderModal" class="modal-backdrop">
-  <div class="modal-sheet">
-    <div class="modal-head">
-      <h3>تعديل الطلب <span id="editOrderCodeLabel" style="font-size:13px;color:var(--muted);"></span></h3>
-      <button type="button" class="close-btn" data-close="editOrderModal">إغلاق</button>
-    </div>
-    <div id="editOrderItems"></div>
-    <div id="editOrderTotal" style="font-weight:800;font-size:16px;color:var(--navy);margin:12px 0;">الإجمالي الجديد: 0 جنيه</div>
-    <button id="saveEditedOrderBtn" type="button" class="btn-accent">حفظ التعديلات</button>
-    <div id="editOrderStatus" class="status-msg"></div>
   </div>
 </div>
 
@@ -447,6 +461,79 @@
 
 <script>
 const DB_URL = "https://nabil-store-35485-default-rtdb.firebaseio.com";
+// مفتاح الويب الخاص بمشروع Firebase (Project settings > General > Web API Key).
+// ده مش سر، بس لازم تحطه هنا. من غير المفتاح الموقع يعرض المنتجات بس ومبيستقبلش طلبات (بيقفل بأمان).
+const FIREBASE_API_KEY = "AIzaSyBWKgkMCX4EvZPGXApY13thgCXiEFj9auM";
+
+const AUTH = { idToken: null, refreshToken: null, uid: null, exp: 0 };
+function authEnabled() { return FIREBASE_API_KEY && !FIREBASE_API_KEY.startsWith("PASTE"); }
+
+async function ensureToken() {
+  if (!authEnabled()) return null;
+  if (!AUTH.idToken) {
+    try {
+      const saved = JSON.parse(localStorage.getItem("nabil_anon_auth") || "null");
+      if (saved && saved.refreshToken) Object.assign(AUTH, saved);
+    } catch {}
+  }
+  if (AUTH.idToken && Date.now() < AUTH.exp - 60000) return AUTH.idToken;
+  if (AUTH.refreshToken) {
+    // لو الشبكة وقعت، fetch بيرمي خطأ ومبنعملش هوية جديدة (عشان العميل ميفقدش طلباته)
+    const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(AUTH.refreshToken)}`
+    });
+    if (r.ok) {
+      const j = await r.json();
+      AUTH.idToken = j.id_token; AUTH.refreshToken = j.refresh_token; AUTH.uid = j.user_id;
+      AUTH.exp = Date.now() + Number(j.expires_in) * 1000;
+      localStorage.setItem("nabil_anon_auth", JSON.stringify(AUTH));
+      return AUTH.idToken;
+    }
+    if (r.status >= 500 || r.status === 429) throw new Error("auth temporarily unavailable");
+    // السيرفر رفض التجديد: الهوية القديمة ضاعت. بنعمل هوية جديدة وبنسجل ده.
+    localStorage.setItem("nabil_identity_reset", String(Date.now()));
+  }
+  const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ returnSecureToken: true })
+  });
+  if (!r.ok) throw new Error("auth failed");
+  const j = await r.json();
+  AUTH.idToken = j.idToken; AUTH.refreshToken = j.refreshToken; AUTH.uid = j.localId;
+  AUTH.exp = Date.now() + Number(j.expiresIn) * 1000;
+  localStorage.setItem("nabil_anon_auth", JSON.stringify(AUTH));
+  return AUTH.idToken;
+}
+
+// كل الطلبات على قاعدة البيانات بتعدي من هنا وبتبعت هوية الجهاز (تسجيل دخول مجهول)
+const PUBLIC_READ_PATHS = ["/products.json", "/categories.json", "/offers.json"];
+async function dbReq(method, path, body) {
+  if (!authEnabled()) {
+    // بدون إعداد الأمان: قراءة المنتجات والعروض بس. أي طلب أو شكوى أو قراءة طلبات مرفوضة.
+    if (!(method === "GET" && PUBLIC_READ_PATHS.some(p => path.startsWith(p)))) throw new Error("SETUP_MISSING");
+  }
+  const token = authEnabled() ? await ensureToken() : null;
+  const sep = path.includes("?") ? "&" : "?";
+  const url = `${DB_URL}${path}${token ? `${sep}auth=${encodeURIComponent(token)}` : ""}`;
+  const opts = { method };
+  if (method === "GET") opts.cache = "no-store";
+  if (body !== undefined) { opts.headers = { "Content-Type": "application/json" }; opts.body = JSON.stringify(body); }
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res;
+}
+
+function getMyOrderIds() {
+  try { return JSON.parse(localStorage.getItem("nabil_my_orders") || "[]").filter(x => typeof x === "string"); } catch { return []; }
+}
+function addMyOrderId(id) {
+  const ids = getMyOrderIds().filter(x => x !== id); ids.unshift(id);
+  localStorage.setItem("nabil_my_orders", JSON.stringify(ids.slice(0, 20)));
+}
+const PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#9a948a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 11.5a2 2 0 0 0 2 1.5h7.6a2 2 0 0 0 2-1.5L21 7H6"/></svg>';
+window.PLACEHOLDER_SVG = PLACEHOLDER_SVG;
 const DEFAULT_CATEGORIES = [
   "الكل",
   "السلع الاساسيه",
@@ -494,7 +581,7 @@ function escapeHtml(str) {
 function getStatusBadgeHtml(statusText) {
   const st = String(statusText || "قيد التجهيز").trim();
   if (st.includes("توصيل") || st.includes("تسليم")) {
-    return `<span class="status-pill st-delivery">🚚 ${escapeHtml(st)}</span>`;
+    return `<span class="status-pill st-delivery">${escapeHtml(st)}</span>`;
   }
   if (st.includes("تم")) {
     return `<span class="status-pill st-done">✓ ${escapeHtml(st)}</span>`;
@@ -502,7 +589,7 @@ function getStatusBadgeHtml(statusText) {
   if (st.includes("ملغ")) {
     return `<span class="status-pill st-cancel">✕ ${escapeHtml(st)}</span>`;
   }
-  return `<span class="status-pill st-prep">⏳ ${escapeHtml(st)}</span>`;
+  return `<span class="status-pill st-prep">${escapeHtml(st)}</span>`;
 }
 
 function canCustomerModifyOrder(statusText) {
@@ -583,18 +670,21 @@ function extractProductsList(payload) {
 
 async function fetchJson(path) {
   const sep = path.includes("?") ? "&" : "?";
-  const url = `${DB_URL}${path}${sep}_t=${Date.now()}`;
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}`);
-  }
+  const res = await dbReq("GET", `${path}${sep}_t=${Date.now()}`);
   return res.json();
+}
+
+function formatOfferPrice(v) {
+  const t = String(v || "").trim();
+  if (!t) return "";
+  if (/^\d+(\.\d+)?$/.test(t)) return `${t} جنيه`;
+  return t; // نسبة خصم أو نص جاهز: يعرض كما هو بدون إضافة "جنيه"
 }
 
 function renderDailyOffersTicker() {
   const track = document.getElementById("dailyOffersTrack");
   const texts = state.dailyOffers.length > 0
-    ? state.dailyOffers.map(o => o.price ? `✦ ${escapeHtml(o.title)} — ${escapeHtml(o.price)} جنيه` : `✦ ${escapeHtml(o.title)}`)
+    ? state.dailyOffers.map(o => o.price ? `✦ ${escapeHtml(o.title)} — <bdi>${escapeHtml(formatOfferPrice(o.price))}</bdi>` : `✦ ${escapeHtml(o.title)}`)
     : ["عروض يومية متجددة في محلات نبيل عبد العال • أسعار مميزة على السلع الأساسية والزيوت والسمنات"];
   const joined = texts.join("   •   ");
   track.innerHTML = `<span>${joined}</span><span>${joined}</span>`;
@@ -735,12 +825,21 @@ function renderProducts() {
     return;
   }
 
+  const catOrder = DEFAULT_CATEGORIES.concat(state.customCategories);
+  const rank = c => { const i = catOrder.indexOf(c); return i === -1 ? 999 : i; };
+  filtered.sort((a, b) => rank(a.category) - rank(b.category) || String(a.category).localeCompare(String(b.category), "ar") || a.name.localeCompare(b.name, "ar"));
+  let lastCat = null;
   grid.innerHTML = filtered.map(p => {
+    let heading = "";
+    if (state.selectedCategory === "الكل" && p.category !== lastCat) {
+      heading = `<h3 class="cat-heading">${escapeHtml(p.category)}</h3>`;
+      lastCat = p.category;
+    }
     const isAvail = p.available !== false;
     const qty = isAvail ? Number(state.cart[p.id]?.qty || 0) : 0;
     const imgHtml = p.image
-      ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.parentElement.textContent='🛒'" />`
-      : "🛒";
+      ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML=window.PLACEHOLDER_SVG" />`
+      : PLACEHOLDER_SVG;
     const ribbonHtml = isAvail ? "" : `<span class="unavail-ribbon">غير متاح</span>`;
     const controlHtml = isAvail
       ? `
@@ -752,12 +851,13 @@ function renderProducts() {
       `
       : `<div class="unavail-notice">غير متاح حالياً</div>`;
 
-    return `
+    return heading + `
       <article class="p-card ${isAvail ? "" : "unavailable-card"}">
         <div>
           <div class="p-img">${imgHtml}${ribbonHtml}</div>
           <div class="p-name">${escapeHtml(p.name)}</div>
           <div class="p-cat">${escapeHtml(p.category)}</div>
+          ${p.description ? `<div class="p-desc">${escapeHtml(p.description)}</div>` : ""}
           <div class="p-price">${p.price} جنيه</div>
         </div>
         ${controlHtml}
@@ -797,6 +897,8 @@ function changeQty(productId, delta) {
 function updateCartBadge() {
   const totalQty = Object.values(state.cart).reduce((sum, item) => sum + Number(item.qty || 0), 0);
   document.getElementById("cartBadge").textContent = String(totalQty);
+  const barTotal = Object.values(state.cart).reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0);
+  document.getElementById("cartBarTotal").textContent = barTotal + " جنيه";
 }
 
 function renderCartModal() {
@@ -880,7 +982,8 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000) + "-" + String(Date.now()).slice(-3);
+  const rnd = crypto.getRandomValues(new Uint32Array(3));
+  const orderId = "ORD-" + Array.from(rnd).map(n => n.toString(36).toUpperCase().padStart(6,"0").slice(-6)).join("");
   const total = items.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 0), 0);
   const phoneClean = document.getElementById("custPhone").value.trim();
 
@@ -901,22 +1004,23 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    const res = await fetch(`${DB_URL}/orders/${encodeURIComponent(orderId)}.json`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderPayload)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await ensureToken();
+    orderPayload.uid = AUTH.uid;
+    await dbReq("PUT", `/orders/${encodeURIComponent(orderId)}.json`, orderPayload);
+    addMyOrderId(orderId);
     state.cart = {};
     saveCart();
     renderProducts();
     renderCartModal();
     document.getElementById("orderForm").reset();
     statusEl.style.color = "var(--ok)";
-    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز.`;
-  } catch {
+    loadMyOrders();
+    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز. احتفظ بالرقم لمتابعة طلبك.`;
+  } catch (err) {
     statusEl.style.color = "var(--danger)";
-    statusEl.textContent = "تعذر إرسال الطلب الآن. حاول مرة أخرى.";
+    statusEl.textContent = String(err && err.message) === "SETUP_MISSING"
+      ? "الموقع مش جاهز لاستقبال الطلبات دلوقتي (إعداد الأمان لسه ما اكتملش). كلّم المحل مباشرة."
+      : "تعذر إرسال الطلب الآن. حاول مرة أخرى.";
   }
 });
 
@@ -933,216 +1037,103 @@ document.getElementById("supportForm").addEventListener("submit", async (e) => {
     timestamp: Date.now()
   };
   try {
-    const res = await fetch(`${DB_URL}/complaints/${encodeURIComponent(ticketId)}.json`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await dbReq("PUT", `/complaints/${encodeURIComponent(ticketId)}.json`, payload);
     document.getElementById("supportForm").reset();
     statusEl.style.color = "var(--ok)";
     statusEl.textContent = "تم إرسال رسالتك بنجاح وسيتواصل معك فريق المتجر.";
-  } catch {
+  } catch (err) {
     statusEl.style.color = "var(--danger)";
-    statusEl.textContent = "تعذر إرسال الرسالة الآن. حاول مرة أخرى.";
+    statusEl.textContent = String(err && err.message) === "SETUP_MISSING"
+      ? "الموقع مش جاهز لاستقبال الرسائل دلوقتي (إعداد الأمان لسه ما اكتملش)."
+      : "تعذر إرسال الرسالة الآن. حاول مرة أخرى.";
   }
 });
 
 function renderTrackedOrderCard(found) {
-  const orderKey = String(found._key || found.id || found.orderCode || "");
+  const orderKey = String(found._key || found.id || "");
   const statusText = String(found.status || "قيد التجهيز");
   const itemsText = Array.isArray(found.items)
-    ? found.items.map(i => `${escapeHtml(i.name)} (${i.qty})`).join("، ")
+    ? found.items.map(i => `${escapeHtml(i.name)} (${escapeHtml(i.qty)})`).join("، ")
     : "";
-  const allowEditCancel = canCustomerModifyOrder(statusText);
-
-  const actionsHtml = allowEditCancel
+  const allowChange = canCustomerModifyOrder(statusText);
+  const actionsHtml = allowChange
     ? `
       <div class="order-actions">
-        <button type="button" class="btn-primary" data-edit-order="${escapeHtml(orderKey)}">✏️ تعديل الطلب</button>
-        <button type="button" class="btn-danger-soft" data-cancel-order="${escapeHtml(orderKey)}">✕ إلغاء الطلب</button>
-      </div>
-    `
-    : `<div style="margin-top:8px;font-size:12px;color:var(--muted);">تم تحديث حالة الطلب من الإدارة ولا يمكن تعديله أو إلغاؤه الآن.</div>`;
-
+        <button type="button" class="btn-danger-soft" data-cancel-order="${escapeHtml(orderKey)}">إلغاء الطلب</button>
+        <button type="button" class="btn-primary" data-request-change="${escapeHtml(orderKey)}">طلب تعديل</button>
+      </div>`
+    : `<div style="margin-top:8px;font-size:12px;color:var(--muted);">حالة الطلب اتحدّثت من المحل ومينفعش نعدّله أو نلغيه من هنا دلوقتي.</div>`;
   return `
     <div class="order-box">
       <div><strong>رقم الطلب:</strong> ${escapeHtml(orderKey)}</div>
       <div style="margin-top:6px;"><strong>الحالة الحالية:</strong> ${getStatusBadgeHtml(statusText)}</div>
-      <div style="margin-top:6px;"><strong>العميل:</strong> ${escapeHtml(found.customerName || "")}</div>
       <div><strong>الإجمالي:</strong> ${escapeHtml(found.total ?? 0)} جنيه</div>
       ${itemsText ? `<div style="margin-top:4px;color:var(--muted);"><strong>الأصناف:</strong> ${itemsText}</div>` : ""}
       ${actionsHtml}
-    </div>
-  `;
+    </div>`;
 }
 
 function bindTrackedOrderActions() {
   const out = document.getElementById("trackResult");
-  out.querySelectorAll("[data-edit-order]").forEach(btn => {
+  out.querySelectorAll("[data-request-change]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const oid = btn.getAttribute("data-edit-order");
-      const target = state.trackedOrders.find(o => String(o._key || o.id || o.orderCode) === oid);
-      if (!target || !canCustomerModifyOrder(target.status)) return;
-      state.editingOrderId = oid;
-      state.editingItems = Array.isArray(target.items)
-        ? target.items.map(it => ({ ...it, qty: Number(it.qty || 1), price: Number(it.price || 0) }))
-        : [];
-      document.getElementById("editOrderCodeLabel").textContent = `(${oid})`;
-      document.getElementById("editOrderStatus").textContent = "";
-      renderEditOrderModal();
-      openModal("editOrderModal");
+      const oid = btn.getAttribute("data-request-change");
+      const target = state.trackedOrders.find(o => String(o._key) === oid);
+      document.getElementById("supName").value = (target && target.customerName) || "";
+      document.getElementById("supPhone").value = (target && (target.customerPhone || target.phone)) || "";
+      document.getElementById("supMsg").value = `طلب تعديل للطلب رقم ${oid}: `;
+      document.getElementById("supportStatus").textContent = "اكتب التعديل المطلوب وهيتواصل معاك المحل.";
+      openModal("supportModal");
     });
   });
-
   out.querySelectorAll("[data-cancel-order]").forEach(btn => {
     btn.addEventListener("click", async () => {
       const oid = btn.getAttribute("data-cancel-order");
-      const target = state.trackedOrders.find(o => String(o._key || o.id || o.orderCode) === oid);
+      const target = state.trackedOrders.find(o => String(o._key) === oid);
       if (!target || !canCustomerModifyOrder(target.status)) return;
-      const updated = { ...target, status: "ملغي بواسطة العميل", updatedAt: Date.now() };
-      delete updated._key;
+      if (!confirm("متأكد إنك عايز تلغي الطلب؟")) return;
       try {
-        const res = await fetch(`${DB_URL}/orders/${encodeURIComponent(oid)}.json`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updated)
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        target.status = "ملغي بواسطة العميل";
-        out.innerHTML = renderTrackedOrderCard(target);
-        bindTrackedOrderActions();
+        // بيغيّر حقل الحالة بس. السيرفر (قواعد Firebase) هو اللي بيتأكد إن الطلب بتاعك.
+        await dbReq("PUT", `/orders/${encodeURIComponent(oid)}/status.json`, "ملغي بواسطة العميل");
+        loadMyOrders();
       } catch {
-        out.innerHTML += `<div style="color:var(--danger);font-size:12px;margin-top:6px;">تعذر إلغاء الطلب الآن.</div>`;
+        btn.insertAdjacentHTML("afterend", `<div style="color:var(--danger);font-size:12px;width:100%;">تعذر إلغاء الطلب الآن. ابعت استفسار للمحل.</div>`);
       }
     });
   });
 }
 
-function renderEditOrderModal() {
-  const container = document.getElementById("editOrderItems");
-  const totalEl = document.getElementById("editOrderTotal");
-  const activeItems = state.editingItems.filter(i => Number(i.qty || 0) > 0);
-
-  if (activeItems.length === 0) {
-    container.innerHTML = `<div style="color:var(--muted);padding:12px 0;">لا توجد أصناف في الطلب (سيتم إلغاء الطلب إذا حفظت وهو فارغ).</div>`;
-    totalEl.textContent = "الإجمالي الجديد: 0 جنيه";
-    return;
-  }
-
-  let total = 0;
-  container.innerHTML = activeItems.map((item, idx) => {
-    const lineTotal = Number(item.price || 0) * Number(item.qty || 0);
-    total += lineTotal;
-    return `
-      <div class="cart-item">
-        <div>
-          <div style="font-weight:700;">${escapeHtml(item.name)}</div>
-          <div style="font-size:12px;color:var(--muted);">${item.price} جنيه × ${item.qty} = ${lineTotal} جنيه</div>
-        </div>
-        <div class="qty-box" style="width:auto;">
-          <button type="button" class="btn-outline qty-btn" data-ed-dec="${idx}">-</button>
-          <span class="qty-val">${item.qty}</span>
-          <button type="button" class="btn-primary qty-btn" data-ed-inc="${idx}">+</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  totalEl.textContent = `الإجمالي الجديد: ${total} جنيه`;
-
-  container.querySelectorAll("[data-ed-dec]").forEach(b => {
-    b.addEventListener("click", () => {
-      const i = Number(b.getAttribute("data-ed-dec"));
-      if (state.editingItems[i]) {
-        state.editingItems[i].qty = Math.max(0, Number(state.editingItems[i].qty || 0) - 1);
-        renderEditOrderModal();
-      }
-    });
-  });
-
-  container.querySelectorAll("[data-ed-inc]").forEach(b => {
-    b.addEventListener("click", () => {
-      const i = Number(b.getAttribute("data-ed-inc"));
-      if (state.editingItems[i]) {
-        state.editingItems[i].qty = Number(state.editingItems[i].qty || 0) + 1;
-        renderEditOrderModal();
-      }
-    });
-  });
-}
-
-document.getElementById("saveEditedOrderBtn").addEventListener("click", async () => {
-  const statusEl = document.getElementById("editOrderStatus");
-  const oid = state.editingOrderId;
-  const target = state.trackedOrders.find(o => String(o._key || o.id || o.orderCode) === oid);
-  if (!target || !canCustomerModifyOrder(target.status)) {
-    statusEl.style.color = "var(--danger)";
-    statusEl.textContent = "لا يمكن تعديل هذا الطلب الآن.";
-    return;
-  }
-
-  const nextItems = state.editingItems.filter(i => Number(i.qty || 0) > 0);
-  const nextTotal = nextItems.reduce((s, it) => s + Number(it.price || 0) * Number(it.qty || 0), 0);
-  const updated = {
-    ...target,
-    items: nextItems,
-    total: nextTotal,
-    status: nextItems.length === 0 ? "ملغي بواسطة العميل" : (target.status || "قيد التجهيز"),
-    updatedAt: Date.now()
-  };
-  delete updated._key;
-
-  try {
-    const res = await fetch(`${DB_URL}/orders/${encodeURIComponent(oid)}.json`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    Object.assign(target, updated, { _key: oid });
-    document.getElementById("trackResult").innerHTML = renderTrackedOrderCard(target);
-    bindTrackedOrderActions();
-    statusEl.style.color = "var(--ok)";
-    statusEl.textContent = "تم حفظ تعديلات الطلب بنجاح.";
-    setTimeout(() => closeModal("editOrderModal"), 700);
-  } catch {
-    statusEl.style.color = "var(--danger)";
-    statusEl.textContent = "تعذر حفظ التعديل الآن. حاول مرة أخرى.";
-  }
-});
-
-document.getElementById("trackBtn").addEventListener("click", async () => {
-  const query = document.getElementById("trackInput").value.trim().toLowerCase();
+async function loadMyOrders() {
   const out = document.getElementById("trackResult");
-  if (!query) {
-    out.innerHTML = `<div class="order-box" style="color:var(--danger);">اكتب رقم الطلب أو رقم الهاتف أولاً.</div>`;
+  const ids = getMyOrderIds();
+  if (ids.length === 0) {
+    out.innerHTML = `<div class="order-box">مفيش طلبات متسجلة على الجهاز ده لسه.</div>`;
+    state.trackedOrders = [];
     return;
   }
-  out.innerHTML = `<div class="order-box">جاري البحث عن الطلب...</div>`;
-  try {
-    const raw = await fetchJson("/orders.json");
-    const list = raw && typeof raw === "object"
-      ? Object.entries(raw).map(([k, v]) => ({ ...(v || {}), _key: v?.id || k })).filter(o => !o.deleted)
-      : [];
-    state.trackedOrders = list;
-    const found = list.find(o =>
-      String(o._key || o.id || o.orderCode || "").toLowerCase() === query ||
-      String(o.customerPhone || o.phone || "").trim().toLowerCase() === query
-    );
-    if (!found) {
-      out.innerHTML = `<div class="order-box">لم يتم العثور على طلب مطابق لهذا الرقم.</div>`;
-      return;
-    }
-    out.innerHTML = renderTrackedOrderCard(found);
-    bindTrackedOrderActions();
-  } catch {
-    out.innerHTML = `<div class="order-box" style="color:var(--danger);">تعذر جلب بيانات الطلب حالياً.</div>`;
-  }
-});
+  out.innerHTML = `<div class="order-box">جاري تحميل طلباتك...</div>`;
+  const results = await Promise.allSettled(ids.map(id => fetchJson(`/orders/${encodeURIComponent(id)}.json`)));
+  const list = [];
+  let failed = 0;
+  results.forEach((r, i) => {
+    if (r.status === "fulfilled" && r.value && !r.value.deleted) list.push({ ...r.value, _key: ids[i] });
+    else if (r.status === "rejected") failed++;
+  });
+  state.trackedOrders = list;
+  let html = list.map(renderTrackedOrderCard).join("");
+  if (localStorage.getItem("nabil_identity_reset")) html += `<div class="order-box">ملحوظة: هوية الجهاز اتجددت، فممكن طلبات قديمة متظهرش هنا. ابعت استفسار للمحل برقم الطلب.</div>`;
+  if (failed) html += `<div class="order-box" style="color:var(--danger);">تعذر تحميل ${failed} طلب. جرّب تاني بعد شوية.</div>`;
+  if (!html) html = `<div class="order-box">مفيش طلبات ظاهرة. لو طلبك اتحذف أو اتعمل من جهاز تاني، ابعت استفسار للمحل.</div>`;
+  out.innerHTML = html;
+  bindTrackedOrderActions();
+}
 
+document.getElementById("trackBtn").addEventListener("click", loadMyOrders);
+
+if (!authEnabled()) document.getElementById("setupBanner").style.display = "block";
 updateCartBadge();
 startRealtimePolling();
+if (getMyOrderIds().length) loadMyOrders();
 </script>
 </body>
 </html>

@@ -65,7 +65,8 @@
     <h2 style="margin-top:0;">دخول لوحة الإدارة</h2>
     <p style="font-size:13px;color:var(--muted);">محلات نبيل عبد العال</p>
     <form id="loginForm" style="display:grid;gap:10px;">
-      <input id="passInput" type="password" placeholder="أدخل كلمة السر" required />
+      <input id="emailInput" type="email" placeholder="البريد الإلكتروني للإدارة" autocomplete="username" required />
+      <input id="passInput" type="password" placeholder="كلمة السر" autocomplete="current-password" required />
       <button type="submit" class="btn-primary" style="width:100%;">دخول</button>
     </form>
     <div id="loginError" class="status-msg" style="color:var(--danger);"></div>
@@ -166,7 +167,38 @@
 
 <script>
 const DB_URL = "https://nabil-store-35485-default-rtdb.firebaseio.com";
-const ADMIN_PASS = "2026";
+// مفتاح الويب الخاص بمشروع Firebase (Project settings > General > Web API Key). مش سر، بس لازم يتحط.
+const FIREBASE_API_KEY = "AIzaSyBWKgkMCX4EvZPGXApY13thgCXiEFj9auM";
+const ADMIN = { idToken: null, refreshToken: null, uid: null, exp: 0 };
+
+function saveAdminSession() { sessionStorage.setItem("nabil_admin_session", JSON.stringify(ADMIN)); }
+async function adminSignIn(email, password) {
+  const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, returnSecureToken: true })
+  });
+  if (!r.ok) throw new Error("bad credentials");
+  const j = await r.json();
+  Object.assign(ADMIN, { idToken: j.idToken, refreshToken: j.refreshToken, uid: j.localId, exp: Date.now() + Number(j.expiresIn) * 1000 });
+  saveAdminSession();
+}
+async function adminToken() {
+  if (!ADMIN.idToken) throw new Error("not signed in");
+  if (Date.now() < ADMIN.exp - 60000) return ADMIN.idToken;
+  const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`, {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(ADMIN.refreshToken)}`
+  });
+  if (!r.ok) { sessionStorage.removeItem("nabil_admin_session"); location.reload(); throw new Error("session expired"); }
+  const j = await r.json();
+  Object.assign(ADMIN, { idToken: j.id_token, refreshToken: j.refresh_token, uid: j.user_id, exp: Date.now() + Number(j.expires_in) * 1000 });
+  saveAdminSession();
+  return ADMIN.idToken;
+}
+async function authUrl(path) {
+  const t = await adminToken();
+  return `${DB_URL}${path}${path.includes("?") ? "&" : "?"}auth=${encodeURIComponent(t)}`;
+}
 const DEFAULT_CATEGORIES = ["السلع الاساسيه", "الزيوت والسمنات", "معلبات", "منظفات", "ألبان"];
 
 let adminState = {
@@ -277,13 +309,13 @@ document.addEventListener("pointerdown", () => {
 
 async function fetchJson(path) {
   const sep = path.includes("?") ? "&" : "?";
-  const res = await fetch(`${DB_URL}${path}${sep}_t=${Date.now()}`, { cache: "no-store" });
+  const res = await fetch(await authUrl(`${path}${sep}_t=${Date.now()}`), { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 async function putJson(path, data) {
-  const res = await fetch(`${DB_URL}${path}`, {
+  const res = await fetch(await authUrl(path), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -293,27 +325,45 @@ async function putJson(path, data) {
 }
 
 async function deleteJson(path) {
-  const res = await fetch(`${DB_URL}${path}`, { method: "DELETE" });
+  const res = await fetch(await authUrl(path), { method: "DELETE" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
-document.getElementById("loginForm").addEventListener("submit", (e) => {
+function showAdminApp() {
+  adminState.soundEnabled = true;
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("adminApp").style.display = "block";
+  startAdminSync();
+}
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const val = document.getElementById("passInput").value;
-  if (val === ADMIN_PASS) {
-    sessionStorage.setItem("nabil_admin_auth", "1");
-    adminState.soundEnabled = true;
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+  if (!FIREBASE_API_KEY || FIREBASE_API_KEY.startsWith("PASTE")) {
+    errEl.textContent = "لازم تضيف مفتاح Firebase في الملف الأول.";
+    return;
+  }
+  try {
+    await adminSignIn(document.getElementById("emailInput").value.trim(), document.getElementById("passInput").value);
+    document.getElementById("passInput").value = "";
     unlockAudioContext();
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminApp").style.display = "block";
-    startAdminSync();
-  } else {
-    document.getElementById("loginError").textContent = "كلمة السر غير صحيحة.";
+    // تأكد إن الحساب مسجل كأدمن في قاعدة البيانات (السيرفر هو اللي بيقرر)
+    const res = await fetch(await authUrl(`/admins/${encodeURIComponent(ADMIN.uid)}.json`));
+    const isAdmin = res.ok && (await res.json()) === true;
+    if (!isAdmin) {
+      sessionStorage.removeItem("nabil_admin_session");
+      errEl.textContent = "الحساب ده مش مسجل كأدمن.";
+      return;
+    }
+    showAdminApp();
+  } catch {
+    errEl.textContent = "البريد أو كلمة السر غير صحيحة.";
   }
 });
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  sessionStorage.removeItem("nabil_admin_auth");
+  sessionStorage.removeItem("nabil_admin_session");
   location.reload();
 });
 
@@ -748,12 +798,10 @@ function startAdminSync() {
   setInterval(loadAllAdminData, 5000);
 }
 
-if (sessionStorage.getItem("nabil_admin_auth") === "1") {
-  adminState.soundEnabled = true;
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("adminApp").style.display = "block";
-  startAdminSync();
-}
+try {
+  const saved = JSON.parse(sessionStorage.getItem("nabil_admin_session") || "null");
+  if (saved && saved.refreshToken) { Object.assign(ADMIN, saved); showAdminApp(); }
+} catch {}
 </script>
 </body>
 </html>
