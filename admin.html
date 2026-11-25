@@ -137,12 +137,26 @@
 
     <!-- تبويب المنتجات -->
     <section id="productsTab" class="panel" style="display:none;">
+      <div style="border:1px dashed #19376d;border-radius:10px;padding:10px;background:#eef3ff;display:grid;gap:8px;margin-bottom:16px;">
+        <strong style="color:#19376d;">الحد الأدنى لقيمة الفاتورة</strong>
+        <div class="row">
+          <input id="minOrderInput" type="number" min="0" step="1" placeholder="بالجنيه، 0 أو فاضي = بدون حد" style="flex:1;min-width:160px;" />
+          <button type="button" id="saveMinOrderBtn" class="btn-accent">حفظ الحد الأدنى</button>
+        </div>
+        <div id="minOrderStatus" class="status-msg"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer;">
+          <input id="countBundleChk" type="checkbox" style="width:auto;" />
+          احسب الوحدات اللي جوه العروض ضمن أقصى كمية المنتج
+        </label>
+        <div class="row"><button type="button" id="saveOfferScopeBtn" class="btn-accent">حفظ</button></div>
+      </div>
       <h2 style="margin-top:0;font-size:17px;">إضافة / تعديل منتج</h2>
       <form id="productForm" style="display:grid;gap:10px;margin-bottom:16px;">
         <input id="prodId" type="hidden" />
         <input id="prodName" type="text" placeholder="اسم المنتج" required />
         <input id="prodPrice" type="number" step="0.5" min="0" placeholder="السعر بالجنيه" required />
         <select id="prodCategory"></select>
+        <input id="prodMax" type="number" step="1" min="1" max="50" placeholder="أقصى كمية في الطلب الواحد (اتركه فاضي لو مفيش حد)" />
         <input id="prodImage" type="text" placeholder="رابط صورة المنتج أو اختر صورة من الجهاز" />
         <div class="img-preview-box">
           <input id="prodImageFile" type="file" accept="image/*" style="display:none;" />
@@ -192,6 +206,7 @@
           <label style="font-size:13px;">صورة العرض (مطلوبة للباكدج): <input id="offerImage" type="file" accept="image/*" /></label>
           <div id="offerImgInfo" style="font-size:12px;color:var(--muted);"></div>
         </div>
+        <input id="offerMax" type="number" step="1" min="1" max="10" placeholder="أقصى عدد من العرض في الطلب الواحد (اختياري)" style="flex:1;min-width:140px;" />
         <button type="submit" class="btn-accent">إضافة عرض</button>
       </form>
       <div id="offersList" class="grid-2"></div>
@@ -650,6 +665,7 @@ function renderProductsAdmin() {
         </div>
         <div>${statusBadge}</div>
         <div style="font-weight:800;color:var(--accent);">${p.price} جنيه</div>
+        <div style="font-size:12px;color:var(--muted);">${p.maxPerCustomer ? "أقصى كمية في الطلب: " + escapeHtml(p.maxPerCustomer) : "بدون حد أقصى في الطلب"}</div>
         <div class="row">
           <button type="button" class="btn-outline" data-edit-p="${escapeHtml(p.id)}" style="padding:6px 10px;font-size:12px;">تعديل</button>
           <button type="button" class="btn-warn" data-toggle-avail="${escapeHtml(p.id)}" ${saving ? "disabled" : ""} style="padding:6px 10px;font-size:12px;">${toggleLabel}</button>
@@ -673,6 +689,7 @@ function renderProductsAdmin() {
       setImagePreview(prod.image || "");
       document.getElementById("prodDesc").value = prod.description || "";
       document.getElementById("prodAvailable").checked = isProductAvailable(prod);
+      document.getElementById("prodMax").value = prod.maxPerCustomer || "";
       document.getElementById("prodStatus").textContent = `جاري تعديل: ${prod.name}`;
     });
   });
@@ -737,7 +754,14 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
     deleted: false,
     updatedAt: Date.now()
   };
-  await putJson(`/products/${encodeURIComponent(id)}.json`, payload);
+  const maxV = Number(document.getElementById("prodMax").value);
+  if (Number.isInteger(maxV) && maxV >= 1 && maxV <= 50) payload.maxPerCustomer = maxV;
+  try { await putJson(`/products/${encodeURIComponent(id)}.json`, payload); }
+  catch {
+    document.getElementById("prodStatus").style.color = "var(--danger)";
+    document.getElementById("prodStatus").textContent = "تعذّر حفظ المنتج. لو ضفت حد أقصى للكمية، ممكن قواعد Firebase مش بتسمح بالحقل ده: جرّب من غير الحد وبلّغني.";
+    return;
+  }
   if (!availChecked) await pauseOffersUsing(id);
   document.getElementById("productForm").reset();
   document.getElementById("prodId").value = "";
@@ -910,9 +934,10 @@ function renderOffersAdmin() {
       ${o.image ? `<img src="${escapeHtml(o.image)}" alt="" style="width:100%;max-height:130px;object-fit:cover;border-radius:8px;" />` : ""}
       <strong>${escapeHtml(o.title)}</strong>
       ${o.price ? `<div style="color:var(--accent);font-weight:700;">${escapeHtml(o.price)}</div>` : ""}
-      ${b ? `<div style="color:#19376d;font-weight:800;">باكدج: ${escapeHtml(b.price)} جنيه</div><div style="font-size:13px;color:var(--muted);">${items}</div>${o.active === false ? `<div style="color:#b91c1c;font-size:12px;">العرض موقوف ومش ظاهر للعملاء</div>` : ""}` : ""}
+      ${b ? `<div style="font-size:12px;color:var(--muted);">${o.maxPerCustomer ? "أقصى عدد في الطلب: " + escapeHtml(o.maxPerCustomer) : "بدون حد أقصى في الطلب"}</div><div style="color:#19376d;font-weight:800;">باكدج: ${escapeHtml(b.price)} جنيه</div><div style="font-size:13px;color:var(--muted);">${items}</div>${o.active === false ? `<div style="color:#b91c1c;font-size:12px;">العرض موقوف ومش ظاهر للعملاء</div>` : ""}` : ""}
       <div class="row">
-        ${b ? `<button type="button" class="btn-outline" data-off-price="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">تعديل سعر الباكدج</button>
+        ${b ? `<button type="button" class="btn-outline" data-off-max="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">الحد الأقصى في الطلب</button>
+        <button type="button" class="btn-outline" data-off-price="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">تعديل سعر الباكدج</button>
         <button type="button" class="btn-outline" data-off-toggle="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">${o.active === false ? "تفعيل" : "إيقاف"}</button>` : ""}
         <button type="button" class="btn-danger" data-del-off="${escapeHtml(o._key)}" style="padding:6px 10px;font-size:12px;">حذف العرض</button>
       </div>
@@ -922,6 +947,20 @@ function renderOffersAdmin() {
   el.querySelectorAll("[data-del-off]").forEach(btn => {
     btn.addEventListener("click", async () => {
       await deleteJson(`/offers/${encodeURIComponent(btn.getAttribute("data-del-off"))}.json`);
+      await loadAllAdminData();
+    });
+  });
+  el.querySelectorAll("[data-off-max]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const key = btn.getAttribute("data-off-max");
+      const raw = prompt("أقصى عدد من العرض في الطلب الواحد (1 إلى 10). اتركه فاضي أو 0 لإلغاء الحد:");
+      if (raw === null) return;
+      const v = Number(raw);
+      try {
+        if (raw.trim() === "" || v === 0) { await deleteJson(`/offers/${encodeURIComponent(key)}/maxPerCustomer.json`); }
+        else if (Number.isInteger(v) && v >= 1 && v <= 10) { await putJson(`/offers/${encodeURIComponent(key)}/maxPerCustomer.json`, v); }
+        else { alert("اكتب رقم صحيح من 1 لـ 10."); return; }
+      } catch { alert("تعذّر حفظ الحد. صلاحيات قاعدة البيانات رفضت الحفظ."); return; }
       await loadAllAdminData();
     });
   });
@@ -959,6 +998,8 @@ document.getElementById("offerForm").addEventListener("submit", async (e) => {
     createdAt: Date.now(),
     active: true
   };
+  const offMax = Number(document.getElementById("offerMax").value);
+  if (Number.isInteger(offMax) && offMax >= 1 && offMax <= 10) data.maxPerCustomer = offMax;
   const rows = bundleRowsData();
   const bprice = Number(document.getElementById("bundlePrice").value);
   const info = document.getElementById("offerImgInfo");
@@ -999,7 +1040,39 @@ function renderSupportAdmin() {
   `).join("");
 }
 
+async function loadMinOrderAdmin() {
+  const st = document.getElementById("minOrderStatus");
+  try {
+    const v = Number(await fetchJson("/offers/_settings/minOrder.json"));
+    const inp = document.getElementById("minOrderInput");
+    if (document.activeElement !== inp) inp.value = Number.isFinite(v) && v > 0 ? v : "";
+  } catch { /* الإعداد لسه مش متاح */ }
+  try { const cb = document.getElementById("countBundleChk"); if (document.activeElement !== cb) cb.checked = (await fetchJson("/offers/_settings/countBundleUnits.json")) === true; } catch {}
+}
+document.getElementById("saveMinOrderBtn").addEventListener("click", async () => {
+  const st = document.getElementById("minOrderStatus");
+  const v = Number(document.getElementById("minOrderInput").value || 0);
+  if (!Number.isFinite(v) || v < 0 || v > 1000000) { st.style.color = "var(--danger)"; st.textContent = "اكتب رقم صحيح."; return; }
+  try {
+    await putJson("/offers/_settings/minOrder.json", v);
+    st.style.color = "var(--ok)";
+    st.textContent = v > 0 ? `تم الحفظ: أقل قيمة للطلب ${v} جنيه.` : "تم إلغاء الحد الأدنى.";
+  } catch {
+    st.style.color = "var(--danger)";
+    st.textContent = "تعذّر الحفظ. صلاحيات قاعدة البيانات رفضت الحفظ. ممكن قواعد Firebase مش بتسمح بالحقل ده.";
+  }
+});
+
+document.getElementById("saveOfferScopeBtn").addEventListener("click", async () => {
+  const st = document.getElementById("minOrderStatus");
+  try {
+    await putJson("/offers/_settings/countBundleUnits.json", document.getElementById("countBundleChk").checked);
+    st.style.color = "var(--ok)"; st.textContent = "تم الحفظ.";
+  } catch { st.style.color = "var(--danger)"; st.textContent = "تعذّر الحفظ. صلاحيات قاعدة البيانات رفضت الحفظ."; }
+});
+
 async function loadAllAdminData() {
+  loadMinOrderAdmin();
   const genAtStart = writeGen;
   try {
     const [prodRaw, catRaw, ordRaw, offRaw, supRaw] = await Promise.allSettled([

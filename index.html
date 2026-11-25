@@ -648,6 +648,8 @@ let state = {
   trackedOrders: [],
   offersFull: [],
   cartNotices: [],
+  minOrder: 0,
+  countBundleUnits: false,
   noticeUnacked: false,
   editingOrderId: null,
   editingItems: []
@@ -716,8 +718,65 @@ function normalizeProduct(id, raw) {
     category,
     description,
     image,
-    available
+    available,
+    maxPerCustomer: limitNum(raw.maxPerCustomer)
   };
+}
+function limitNum(v) { const n = Number(v); return Number.isInteger(n) && n >= 1 ? n : 0; }
+function showLimitToast(msg) {
+  let t = document.getElementById("limitToast");
+  if (!t) {
+    t = document.createElement("div"); t.id = "limitToast";
+    t.setAttribute("role", "alert");
+    t.style.cssText = "position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#b91c1c;color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;z-index:99999;max-width:90vw;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.25);";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.display = "block";
+  clearTimeout(showLimitToast._t);
+  showLimitToast._t = setTimeout(() => { t.style.display = "none"; }, 3500);
+}
+async function loadMinOrder() {
+  try {
+    const v = await fetchJson("/offers/_settings/minOrder.json");
+    const n = Number(v);
+    state.minOrder = Number.isFinite(n) && n > 0 ? n : 0;
+  } catch { /* لو الإعداد مش متاح نعتبر مفيش حد أدنى */ }
+  try { state.countBundleUnits = (await fetchJson("/offers/_settings/countBundleUnits.json")) === true; } catch {}
+  renderCartModal();
+}
+function cartTotalValue() {
+  return Object.values(state.cart).reduce((sum, it) => sum + Number(it.price || 0) * Number(it.qty || 0), 0);
+}
+// وحدات المنتج في السلة: المباعة منفردة + (لو الإعداد مفعّل) الوحدات اللي جوه العروض
+function productUnits(pid) {
+  let n = 0;
+  for (const it of Object.values(state.cart)) {
+    if (it.kind === "bundle") { if (state.countBundleUnits) n += Number(it.qty || 0) * Number((it.items || {})[pid] || 0); }
+    else if (it.id === pid) n += Number(it.qty || 0);
+  }
+  return n;
+}
+function bundleCapProblem(offerId, addQty, existingQty) {
+  // يرجّع رسالة لو إضافة العرض هتكسر أقصى كمية لمنتج جواه (لما الإعداد مفعّل)
+  if (!state.countBundleUnits) return "";
+  const o = (state.offersFull || []).find(x => x.id === offerId); const b = getBundle(o);
+  if (!b) return "";
+  for (const bi of b.items) {
+    const p = state.products.find(pr => pr.id === bi.pid);
+    if (!p || !p.maxPerCustomer) continue;
+    const others = productUnits(bi.pid) - Number(existingQty || 0) * bi.qty;
+    if (others + (Number(existingQty || 0) + addQty) * bi.qty > p.maxPerCustomer)
+      return `«${p.name}» الحد الأقصى ${p.maxPerCustomer} في الطلب الواحد (بيشمل الوحدات اللي جوه العروض).`;
+  }
+  return "";
+}
+function lineLimit(item) {
+  if (item.kind === "bundle") {
+    const o = (state.offersFull || []).find(x => x.id === item.offerId);
+    return { cap: Math.min(10, limitNum(o && o.maxPerCustomer) || 10), custom: limitNum(o && o.maxPerCustomer) };
+  }
+  const p = state.products.find(pr => pr.id === item.id);
+  return { cap: Math.min(50, limitNum(p && p.maxPerCustomer) || 50), custom: limitNum(p && p.maxPerCustomer) };
 }
 
 function extractProductsList(payload) {
@@ -881,6 +940,11 @@ async function loadProducts() {
           state.cartNotices.push(`عرض «${line.name}» لم يعد متاحاً وتم حذفه من السلة.`);
           delete state.cart[pid]; cartChanged = true; changes++;
         } else {
+          const oc = Math.min(10, limitNum(off.maxPerCustomer) || 10);
+          if (Number(line.qty) > oc) {
+            state.cartNotices.push(`عرض «${off.title}» الحد الأقصى ${oc} في الطلب الواحد، اتعدّلت الكمية.`);
+            line.qty = oc; cartChanged = true; changes++;
+          }
           const sig = JSON.stringify(Object.entries(line.items || {}).sort());
           const nsig = JSON.stringify(b.items.map(i => [i.pid, i.qty]).sort());
           if (Number(line.price) !== b.price || line.name !== off.title || sig !== nsig) {
@@ -895,6 +959,10 @@ async function loadProducts() {
       if (!foundProd || !foundProd.available) {
         state.cartNotices.push(`«${line.name}» لم يعد متاحاً وتم حذفه من السلة.`);
         delete state.cart[pid];
+        cartChanged = true; changes++;
+      } else if (foundProd.maxPerCustomer && Number(line.qty) > foundProd.maxPerCustomer) {
+        state.cartNotices.push(`«${foundProd.name}» الحد الأقصى ${foundProd.maxPerCustomer} في الطلب الواحد، اتعدّلت الكمية.`);
+        line.qty = foundProd.maxPerCustomer; line.price = foundProd.price; line.name = foundProd.name;
         cartChanged = true; changes++;
       } else if (Number(line.price) !== Number(foundProd.price) || line.name !== foundProd.name) {
         if (Number(line.price) !== Number(foundProd.price)) {
@@ -919,8 +987,10 @@ async function loadProducts() {
 }
 
 function startRealtimePolling() {
+  loadMinOrder();
   loadProducts();
   setInterval(loadProducts, 15000);
+  setInterval(loadMinOrder, 60000);
 }
 
 function getFilteredProducts() {
@@ -997,6 +1067,7 @@ function renderProducts() {
           <div class="p-cat">${escapeHtml(p.category)}</div>
           ${p.description ? `<div class="p-desc">${escapeHtml(p.description)}</div>` : ""}
           <div class="p-price">${p.price} جنيه</div>
+          ${p.maxPerCustomer ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">الحد الأقصى ${p.maxPerCustomer} في الطلب الواحد</div>` : ""}
         </div>
         ${controlHtml}
       </article>
@@ -1069,6 +1140,7 @@ function openBundleModal(offerId) {
     <div class="oc-modal-hero">${o.image ? `<div class="oc-photo"><img src="${escapeHtml(o.image)}" alt="" /></div>` : `<div class="oc-art"><div class="oc-big">${sum > b.price ? "وفّر " + (sum - b.price) + " جنيه" : "عرض خاص"}</div><div class="oc-sub">${b.items.length} منتجات في باكدج واحد</div></div>`}</div>
     <div class="bundle-items">${rows}</div>
     <div style="font-weight:900;font-size:20px;color:var(--navy);">سعر الباكدج: ${b.price} جنيه</div>
+    ${limitNum(o.maxPerCustomer) ? `<div style="font-size:13px;color:var(--muted);">الحد الأقصى ${limitNum(o.maxPerCustomer)} من العرض في الطلب الواحد</div>` : ""}
     ${sum > b.price ? `<div style="margin-top:2px;font-size:13px;color:var(--muted);">سعر المنتجات منفردة: <span class="oc-old" style="margin:0;">${sum} جنيه</span> <span class="oc-save">وفّر ${sum - b.price} جنيه</span></div>` : ""}
     ${problem ? `<div class="status-msg" style="color:var(--danger);">${escapeHtml(problem)}</div>` : `<button type="button" class="btn-offer" id="bundleAdd" style="margin-top:10px;width:100%;padding:12px;border-radius:12px;font-weight:800;">أضف الباكدج للسلة</button>`}
     <div id="bundleMsg" class="status-msg"></div>`;
@@ -1088,7 +1160,10 @@ function changeQty(productId, delta) {
     const o = state.offersFull.find(x => x.id === offerId);
     const b = getBundle(o);
     const cur = Number(state.cart[productId]?.qty || 0);
-    const next = Math.min(10, Math.max(0, cur + delta));
+    const offerCap = Math.min(10, limitNum(o && o.maxPerCustomer) || 10);
+    if (delta > 0 && cur >= offerCap) { showLimitToast(`الحد الأقصى لهذا العرض ${offerCap} في الطلب الواحد.`); return; }
+    if (delta > 0) { const bp = bundleCapProblem(offerId, delta, cur); if (bp) { showLimitToast(bp); return; } }
+    const next = Math.min(offerCap, Math.max(0, cur + delta));
     if (!o || !b || bundleProblem(o) || next === 0) { delete state.cart[productId]; }
     else {
       state.cart[productId] = { id: productId, kind: "bundle", offerId, name: o.title, price: b.price, qty: next,
@@ -1100,7 +1175,9 @@ function changeQty(productId, delta) {
   const prod = state.products.find(p => p.id === productId);
   if (!prod || prod.available === false) return;
   const current = Number(state.cart[productId]?.qty || 0);
-  const next = Math.min(50, Math.max(0, current + delta));
+  const prodCap = Math.min(50, prod.maxPerCustomer || 50);
+  if (delta > 0 && (current >= prodCap || (prod.maxPerCustomer && productUnits(prod.id) >= prod.maxPerCustomer))) { showLimitToast(`الحد الأقصى لـ «${prod.name}» ${prodCap} في الطلب الواحد.`); return; }
+  const next = Math.min(prodCap, Math.max(0, current + delta));
   if (next === 0) {
     delete state.cart[productId];
   } else {
@@ -1164,9 +1241,13 @@ function renderCartModal() {
         </div>
       </div>
     `;
-  }).join("") + `<div class="cart-summary"><span>${count} صنف في السلة</span><span>الإجمالي <b>${total}</b> جنيه</span></div>`;
+  }).join("") + `<div class="cart-summary"><span>${count} صنف في السلة</span><span>الإجمالي <b>${total}</b> جنيه</span></div>${state.minOrder > 0 ? `<div style="margin-top:6px;font-size:13px;font-weight:700;color:${total >= state.minOrder ? "var(--ok)" : "var(--danger)"};">أقل قيمة للطلب ${state.minOrder} جنيه${total >= state.minOrder ? " ✓" : ` (فاضل ${state.minOrder - total} جنيه)`}</div>` : ""}`;
 
   totalEl.textContent = `الإجمالي: ${total} جنيه`;
+  if (state.minOrder > 0) {
+    const short = state.minOrder - total;
+    totalEl.textContent += short > 0 ? ` — أقل قيمة للطلب ${state.minOrder} جنيه (فاضل ${short} جنيه)` : ` — أقل قيمة للطلب ${state.minOrder} جنيه ✓`;
+  }
 
   container.querySelectorAll("[data-c-dec]").forEach(b => b.addEventListener("click", () => changeQty(b.getAttribute("data-c-dec"), -1)));
   container.querySelectorAll("[data-c-inc]").forEach(b => b.addEventListener("click", () => changeQty(b.getAttribute("data-c-inc"), 1)));
@@ -1237,6 +1318,31 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
   if (liveItems.length === 0) {
     statusEl.style.color = "var(--danger)";
     statusEl.textContent = "السلة فاضية دلوقتي بعد تحديث المنتجات.";
+    return;
+  }
+  // حدود المحل: الحد الأدنى لقيمة الطلب وأقصى كمية في الطلب (محدّثة من قاعدة البيانات)
+  await loadMinOrder();
+  for (const it of liveItems) {
+    const lim = lineLimit(it);
+    if (lim.custom && Number(it.qty) > lim.custom) {
+      statusEl.style.color = "var(--danger)";
+      statusEl.textContent = `«${it.name}»: الحد الأقصى ${lim.custom} في الطلب الواحد. عدّل الكمية.`;
+      return;
+    }
+  }
+  if (state.countBundleUnits) {
+    for (const p of state.products) {
+      if (p.maxPerCustomer && productUnits(p.id) > p.maxPerCustomer) {
+        statusEl.style.color = "var(--danger)";
+        statusEl.textContent = `«${p.name}»: الحد الأقصى ${p.maxPerCustomer} في الطلب الواحد (بيشمل الوحدات اللي جوه العروض). عدّل السلة.`;
+        return;
+      }
+    }
+  }
+  const cartSum = cartTotalValue();
+  if (state.minOrder > 0 && cartSum < state.minOrder) {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = `أقل قيمة للطلب ${state.minOrder} جنيه. إجمالي سلتك ${cartSum} جنيه، ضيف ${state.minOrder - cartSum} جنيه عشان تكمل الطلب.`;
     return;
   }
   const rnd = crypto.getRandomValues(new Uint32Array(3));
