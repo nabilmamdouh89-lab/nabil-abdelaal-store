@@ -386,6 +386,63 @@
   .cart-badge { position:static; border:none; }
   .support-fab { display:none; }
   @media (min-width: 680px) { .cart-fab { left:50%; right:auto; transform:translateX(-50%); width:min(560px, calc(100% - 24px)); } }
+
+  /* كارد تتبع الطلب الملوّن أعلى الصفحة */
+  .track-panel {
+    position: relative;
+    background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 45%, var(--royal) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.55);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(6, 21, 43, 0.25);
+    overflow: hidden;
+  }
+  .track-panel::before {
+    content: "";
+    position: absolute;
+    top: -40px; left: -40px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0) 70%);
+    pointer-events: none;
+  }
+  .track-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .track-title {
+    margin: 0; font-size: 18px; font-weight: 900; color: #ffffff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .track-title::before {
+    content: "";
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent-bright);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28);
+    flex: 0 0 auto;
+  }
+  .track-sub { margin: 6px 0 0; font-size: 12.5px; color: #dbeafe; line-height: 1.7; }
+  .track-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(245, 158, 11, 0.16);
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    border-radius: 14px;
+    padding: 8px 10px;
+    flex: 0 0 auto;
+  }
+  .track-btn {
+    margin-top: 12px; width: 100%; padding: 11px 12px;
+    border: none; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    color: var(--navy-deep); font-weight: 900; font-size: 14.5px;
+    box-shadow: 0 6px 14px rgba(217, 119, 6, 0.35);
+  }
+  .track-btn:hover { filter: brightness(1.06); }
+  .track-panel .order-box { background: #fff; color: var(--text); border-right-color: var(--accent-bright); }
+  .track-panel .ord-card { margin-top: 12px; color: var(--text); }
+  .track-panel .ord-card .ord-line,
+  .track-panel .ord-card .ord-total,
+  .track-panel .ord-card .un-note { color: var(--text); }
+
   .req-note { margin-top:8px; font-size:12px; color:var(--muted); }
 </style>
 </head>
@@ -402,6 +459,18 @@
 </header>
 
 <main class="container">
+  <!-- تتبع الطلب: كارد ملوّن في أول الصفحة -->
+  <section class="track-panel" aria-label="تتبع طلبك">
+    <div class="track-head">
+      <div class="track-head-text">
+        <h2 class="track-title">تتبع طلبك</h2>
+        <p class="track-sub">طلباتك اللي اتعملت من الجهاز ده بتظهر هنا أول بأول: قيد التجهيز، قيد التوصيل، تم التسليم.</p>
+      </div>
+      <span class="track-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span>
+    </div>
+    <button id="trackBtn" type="button" class="track-btn">تحديث حالة طلباتي</button>
+    <div id="trackResult"></div>
+  </section>
   <section class="promo-banner" aria-label="شعارنا الدائم">
     <div class="promo-top">
       <span class="promo-tag">✦ شعارنا الدائم</span>
@@ -461,14 +530,6 @@
     <div id="productsGrid" class="products-grid"></div>
   </section>
 
-  <section class="panel">
-    <h2 class="section-title" style="margin-bottom:6px;">طلباتي على هذا الجهاز</h2>
-    <p style="margin:0 0 10px;font-size:13px;color:var(--muted);">
-      بتشوف هنا الطلبات اللي عملتها من نفس الجهاز والمتصفح بس. لو مسحت بيانات المتصفح أو عملت الطلب من جهاز تاني، ابعت استفسار للمحل برقم الطلب.
-    </p>
-    <button id="trackBtn" type="button" class="btn-primary">تحديث حالة طلباتي</button>
-    <div id="trackResult"></div>
-  </section>
 </main>
 
 <button id="cartFab" type="button" class="cart-fab" aria-label="السلة">
@@ -507,7 +568,7 @@
 <div id="supportModal" class="modal-backdrop">
   <div class="modal-sheet">
     <div class="modal-head">
-      <h3>شكاوى واستفسار</h3>
+      <h3 id="supportModalTitle">شكاوى واستفسار</h3>
       <button type="button" class="close-btn" data-close="supportModal">إغلاق</button>
     </div>
     <form id="supportForm" style="display:grid;gap:10px;">
@@ -1267,6 +1328,7 @@ document.getElementById("cartFab").addEventListener("click", () => {
 });
 
 document.getElementById("supportFab").addEventListener("click", () => {
+  document.getElementById("supportModalTitle").textContent = "شكاوى واستفسار";
   document.getElementById("supportStatus").textContent = "";
   openModal("supportModal");
 });
@@ -1474,6 +1536,7 @@ function bindTrackedOrderActions() {
       document.getElementById("supName").value = (target && target.customerName) || "";
       document.getElementById("supPhone").value = (target && (target.customerPhone || target.phone)) || "";
       document.getElementById("supMsg").value = `طلب تعديل للطلب رقم ${oid}: `;
+      document.getElementById("supportModalTitle").textContent = "طلب تعديل الطلب";
       document.getElementById("supportStatus").textContent = "اكتب التعديل المطلوب وهيتواصل معاك المحل.";
       openModal("supportModal");
     });

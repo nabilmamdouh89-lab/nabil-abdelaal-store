@@ -587,8 +587,12 @@ function isProductAvailable(p) {
 
 function renderCategorySelect() {
   const sel = document.getElementById("prodCategory");
+  // التحديث التلقائي كل 5 ثواني كان بيعيد بناء القائمة ويرجّع الاختيار لأول قسم.
+  // بنحافظ على القسم المختار (أو قسم المنتج اللي بيتعدّل) لو لسه موجود.
+  const current = sel.value;
   const all = Array.from(new Set([...DEFAULT_CATEGORIES, ...adminState.categories]));
   sel.innerHTML = all.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  if (current && all.includes(current)) sel.value = current;
 }
 
 function renderCategoriesList() {
