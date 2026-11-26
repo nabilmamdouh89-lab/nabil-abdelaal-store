@@ -64,6 +64,7 @@
     #printArea tr.un td:first-child { text-decoration:line-through; }
     #printArea .pr-total { display:flex; justify-content:space-between; font-weight:900; font-size:16px; margin-top:6px; }
     #printArea .pr-meta div { margin:2px 0; }
+    #printArea .pr-contact { margin-top:12px; border:2px solid #000; border-radius:6px; padding:10px 8px; text-align:center; font-size:17px; font-weight:900; line-height:1.6; }
   }
   .ao-total { display:flex; justify-content:space-between; font-weight:900; font-size:16px; }
   .ao-stbtns { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
@@ -455,7 +456,7 @@ function printInvoice(oid) {
   const when = o.createdAt ? new Date(o.createdAt).toLocaleString("ar-EG") : (Number(o.timestamp) > 1e12 ? new Date(Number(o.timestamp)).toLocaleString("ar-EG") : "");
   const ded = orderDeducted(o);
   document.getElementById("printArea").innerHTML = `
-    <div class="pr-logo"><svg viewBox="0 0 100 100" width="64" height="64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#000"/><circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="2.5"/><text x="50" y="68" text-anchor="middle" font-size="58" font-weight="900" fill="#fff" font-family="Arial,Helvetica,sans-serif">N</text></svg></div>
+    <div class="pr-logo"><svg viewBox="0 0 100 100" width="64" height="64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#000"/><circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M20 34 h8 l4 8" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 42 L38 66 H64 L70 42 Z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><text x="51" y="61" text-anchor="middle" font-size="22" font-weight="900" fill="#fff" font-family="Arial,Helvetica,sans-serif">N</text><circle cx="42" cy="74" r="4.5" fill="#fff"/><circle cx="60" cy="74" r="4.5" fill="#fff"/></svg></div>
     <h1>محلات نبيل عبد العال</h1>
     <div class="pr-sub">فاتورة طلب</div>
     <div class="pr-meta">
@@ -467,7 +468,8 @@ function printInvoice(oid) {
     </div>
     <table><thead><tr><th>الصنف</th><th class="n">الكمية</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody>${rowsI.concat(rowsB).join("")}</tbody></table>
     ${ded > 0 ? `<div class="pr-meta"><div>إجمالي الأصناف: ${money(orderGross(o))} جنيه</div><div>خصم الأصناف غير المتوفرة: ${money(ded)} جنيه</div></div>` : ""}
-    <div class="pr-total"><span>الإجمالي المطلوب</span><span>${money(orderTotal(o))} جنيه</span></div>`;
+    <div class="pr-total"><span>الإجمالي المطلوب</span><span>${money(orderTotal(o))} جنيه</span></div>
+    <div class="pr-contact">للاستفسار والشكاوى برجاء الاتصال على هذا الرقم: <span dir="ltr">01227155016</span><br/>الاسم: السيد سليم</div>`;
   window.print();
 }
 window.printInvoice = printInvoice;
