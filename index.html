@@ -280,6 +280,8 @@
   .oc-modal-hero img { width:100%; height:100%; object-fit:cover; display:block; }
   .cart-notice { background:#fef3c7; border:1px solid #f59e0b; color:#7c2d12; border-radius:10px; padding:8px 10px; margin-bottom:8px; font-size:13px; font-weight:700; }
   .p-price { font-weight: 900; color: var(--navy); font-size: 15.5px; margin: 7px 0 8px; }
+  .p-offer-now { color: #dc2626; }
+  .p-offer-old { color: var(--muted); text-decoration: line-through; font-size: 13px; font-weight: 600; margin-inline-start: 6px; }
   .qty-box { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #f3eee4; padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
   .qty-btn { width: 32px; height: 32px; padding: 0; border-radius: 8px; font-size: 18px; line-height: 1; }
   .qty-val { font-weight: 800; font-size: 14px; color: var(--navy); }
@@ -768,6 +770,10 @@ function normalizeProduct(id, raw) {
   if (!name) return null;
   const priceNum = Number(raw.price ?? raw.unitPrice ?? 0);
   const price = Number.isFinite(priceNum) && priceNum >= 0 ? priceNum : 0;
+  // عرض خاص: صاحب المحل بيخزن سعر البيع الفعلي في price والسعر الأصلي في oldPrice (قواعد الطلبات بتقارن price).
+  const oldNum = Number(raw.oldPrice ?? 0);
+  const basePrice = Number.isFinite(oldNum) && oldNum > price ? oldNum : price;
+  const offerPrice = basePrice > price ? price : 0;
   const category = String(raw.category ?? raw.cat ?? "السلع الاساسيه").trim() || "السلع الاساسيه";
   const description = String(raw.description ?? raw.desc ?? raw.notes ?? "").trim();
   const image = String(raw.image ?? raw.img ?? raw.imageUrl ?? raw.photo ?? "").trim();
@@ -776,6 +782,8 @@ function normalizeProduct(id, raw) {
     id: String(id),
     name,
     price,
+    basePrice,
+    offerPrice,
     category,
     description,
     image,
@@ -1109,7 +1117,7 @@ function renderProducts() {
     const imgHtml = p.image
       ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML=window.PLACEHOLDER_SVG" />`
       : PLACEHOLDER_SVG;
-    const ribbonHtml = isAvail ? "" : `<span class="unavail-ribbon">غير متاح</span>`;
+    const ribbonHtml = !isAvail ? `<span class="unavail-ribbon">غير متاح</span>` : (p.offerPrice ? `<span class="unavail-ribbon">عرض خاص</span>` : "");
     const controlHtml = isAvail
       ? `
         <div class="qty-box">
@@ -1127,7 +1135,7 @@ function renderProducts() {
           <div class="p-name">${escapeHtml(p.name)}</div>
           <div class="p-cat">${escapeHtml(p.category)}</div>
           ${p.description ? `<div class="p-desc">${escapeHtml(p.description)}</div>` : ""}
-          <div class="p-price">${p.price} جنيه</div>
+          <div class="p-price">${p.offerPrice ? `<span class="p-offer-now">${p.price} جنيه</span><s class="p-offer-old">${p.basePrice} جنيه</s>` : `${p.price} جنيه`}</div>
           ${p.maxPerCustomer ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">الحد الأقصى ${p.maxPerCustomer} في الطلب الواحد</div>` : ""}
         </div>
         ${controlHtml}
