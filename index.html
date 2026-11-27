@@ -679,7 +679,7 @@ async function ensureToken() {
 }
 
 // كل الطلبات على قاعدة البيانات بتعدي من هنا وبتبعت هوية الجهاز (تسجيل دخول مجهول)
-const PUBLIC_READ_PATHS = ["/products.json", "/categories.json", "/offers.json"];
+const PUBLIC_READ_PATHS = ["/products.json", "/categories.json", "/offers.json", "/product_images/"];
 async function dbReq(method, path, body, extraHeaders) {
   if (!authEnabled()) {
     // بدون إعداد الأمان: قراءة المنتجات والعروض بس. أي طلب أو شكوى أو قراءة طلبات مرفوضة.
@@ -837,10 +837,70 @@ function normalizeProduct(id, raw) {
     category,
     description,
     image,
+    imgv: String(raw.imgv ?? "").trim(),
     available,
     maxPerCustomer: limitNum(raw.maxPerCustomer)
   };
 }
+
+// ===== تحميل صور المنتجات تدريجياً: الصورة بتنزل لما تظهر على الشاشة بس، وبتتخزن على جهاز العميل =====
+const IMG_CACHE = {};
+const IMG_PENDING = {};
+let imgActive = 0;
+const imgQueue = [];
+const BLANK_GIF = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+function imgSrcFor(p) { return (p && (p.image || IMG_CACHE[p.id])) || ""; }
+async function fetchProductImage(pid, v) {
+  const ck = `https://img.local/${encodeURIComponent(pid)}/${encodeURIComponent(v || "0")}`;
+  let cache = null;
+  try { if (window.caches) cache = await caches.open("nabil-pimg"); } catch {}
+  if (cache) {
+    try { const hit = await cache.match(ck); if (hit) { const d = await hit.json(); if (typeof d === "string" && d.startsWith("data:image/")) return d; } } catch {}
+  }
+  const res = await dbReq("GET", `/product_images/${encodeURIComponent(pid)}.json`);
+  const text = await res.text();
+  const d = JSON.parse(text);
+  if (typeof d !== "string" || !d.startsWith("data:image/")) return "";
+  if (cache) { try { await cache.put(ck, new Response(JSON.stringify(d), { headers: { "Content-Type": "application/json" } })); } catch {} }
+  return d;
+}
+function applyProductImage(pid, d) {
+  document.querySelectorAll("img.lazyimg").forEach(el => { if (el.getAttribute("data-pid") === pid) { el.src = d; el.classList.remove("lazyimg"); } });
+  document.querySelectorAll(".cl-img[data-pid]").forEach(el => { if (el.getAttribute("data-pid") === pid) { el.innerHTML = `<img src="${d}" alt="" />`; } });
+}
+function pumpImgQueue() {
+  while (imgActive < 6 && imgQueue.length) {
+    const job = imgQueue.shift();
+    imgActive++;
+    fetchProductImage(job.pid, job.v).then(d => {
+      if (d) { IMG_CACHE[job.pid] = d; applyProductImage(job.pid, d); }
+    }).catch(() => {}).finally(() => { delete IMG_PENDING[job.pid]; imgActive--; pumpImgQueue(); });
+  }
+}
+function requestProductImage(pid, v) {
+  if (IMG_CACHE[pid]) { applyProductImage(pid, IMG_CACHE[pid]); return; }
+  if (IMG_PENDING[pid]) return;
+  IMG_PENDING[pid] = true;
+  imgQueue.push({ pid, v });
+  pumpImgQueue();
+}
+let imgObserver = null;
+function observeLazyImages(root) {
+  const els = (root || document).querySelectorAll("img.lazyimg");
+  if (!("IntersectionObserver" in window)) { els.forEach(el => requestProductImage(el.getAttribute("data-pid"), el.getAttribute("data-v"))); return; }
+  if (!imgObserver) {
+    imgObserver = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          imgObserver.unobserve(en.target);
+          requestProductImage(en.target.getAttribute("data-pid"), en.target.getAttribute("data-v"));
+        }
+      });
+    }, { rootMargin: "300px 0px" });
+  }
+  els.forEach(el => imgObserver.observe(el));
+}
+
 function limitNum(v) { const n = Number(v); return Number.isInteger(n) && n >= 1 ? n : 0; }
 function showLimitToast(msg) {
   let t = document.getElementById("limitToast");
@@ -1167,9 +1227,10 @@ function renderProducts() {
     }
     const isAvail = p.available !== false;
     const qty = isAvail ? Number(state.cart[p.id]?.qty || 0) : 0;
-    const imgHtml = p.image
-      ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML=window.PLACEHOLDER_SVG" />`
-      : PLACEHOLDER_SVG;
+    const pSrc = imgSrcFor(p);
+    const imgHtml = pSrc
+      ? `<img src="${escapeHtml(pSrc)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML=window.PLACEHOLDER_SVG" />`
+      : (p.imgv ? `<img class="lazyimg" src="${BLANK_GIF}" data-pid="${escapeHtml(p.id)}" data-v="${escapeHtml(p.imgv)}" alt="${escapeHtml(p.name)}" onerror="this.parentElement.innerHTML=window.PLACEHOLDER_SVG" />` : PLACEHOLDER_SVG);
     const ribbonHtml = !isAvail ? `<span class="unavail-ribbon">غير متاح</span>` : (p.offerPrice ? `<span class="unavail-ribbon">عرض خاص</span>` : "");
     const controlHtml = isAvail
       ? `
@@ -1196,6 +1257,7 @@ function renderProducts() {
     `;
   }).join("");
 
+  observeLazyImages(grid);
   grid.querySelectorAll(".qty-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-id");
@@ -1340,8 +1402,8 @@ function renderCartModal() {
   const thumb = item => {
     let src = "";
     if (item.kind === "bundle") { const of = (state.offersFull || []).find(x => x.id === item.offerId); src = of && of.image || ""; }
-    else { const p = state.products.find(pr => pr.id === item.id); src = p && p.image || ""; }
-    return `<div class="cl-img">${src ? `<img src="${escapeHtml(src)}" alt="" />` : escapeHtml(String(item.name || "?").trim().charAt(0))}</div>`;
+    else { const p = state.products.find(pr => pr.id === item.id); src = imgSrcFor(p); if (!src && p && p.imgv) requestProductImage(p.id, p.imgv); }
+    return `<div class="cl-img"${item.kind === "bundle" ? "" : ` data-pid="${escapeHtml(String(item.id))}"`}>${src ? `<img src="${escapeHtml(src)}" alt="" />` : escapeHtml(String(item.name || "?").trim().charAt(0))}</div>`;
   };
   let count = 0;
   container.innerHTML = noticeHtml + items.map(item => {
