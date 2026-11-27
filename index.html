@@ -1364,7 +1364,7 @@ function closeModal(id) {
 
 document.getElementById("cartFab").addEventListener("click", () => {
   renderCartModal();
-  document.getElementById("orderStatus").textContent = "";
+  document.getElementById("orderStatus").textContent = ""; showEditBanner();
   openModal("cartModal");
 });
 
@@ -1464,6 +1464,29 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
   const total = Object.values(itemsObj).reduce((s, it) => s + it.price * it.qty, 0) + Object.values(bundlesObj).reduce((s, b) => s + b.price * b.qty, 0);
   const phoneClean = document.getElementById("custPhone").value.trim();
 
+  if (state.editingOrderId) {
+    const oid = state.editingOrderId;
+    const patch = {
+      items: Object.keys(itemsObj).length ? itemsObj : null,
+      bundles: Object.keys(bundlesObj).length ? bundlesObj : null,
+      total,
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await ensureToken();
+      await dbReq("PATCH", `/orders/${encodeURIComponent(oid)}.json`, patch);
+      endEditMode();
+      state.cart = {}; state.cartNotices = [];
+      saveCart(); renderProducts(); renderCartModal();
+      statusEl.style.color = "var(--ok)";
+      loadMyOrders();
+      statusEl.innerHTML = `تم تعديل طلبك رقم <strong>${escapeHtml(oid)}</strong> بنجاح. الإجمالي الجديد: ${fmtEGP(total)}.`;
+    } catch (err) {
+      statusEl.style.color = "var(--danger)";
+      statusEl.textContent = "تعذّر حفظ التعديل. غالبًا حالة الطلب اتغيّرت من المحل (بدأ التجهيز) أو سعر اتحدّث. حدّث الصفحة وراجع طلبك، ولو محتاج كلّم المحل.";
+    }
+    return;
+  }
   const orderPayload = {
     id: orderId,
     orderCode: orderId,
@@ -1486,12 +1509,6 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     orderPayload.uid = AUTH.uid;
     await dbReq("PUT", `/orders/${encodeURIComponent(orderId)}.json`, orderPayload);
     addMyOrderId(orderId);
-    let editNote = "";
-    if (state.editingOrderId) {
-      const oldId = state.editingOrderId; state.editingOrderId = null;
-      try { await dbReq("PUT", `/orders/${encodeURIComponent(oldId)}/status.json`, "ملغي بواسطة العميل (تم تعديله)"); editNote = ` الطلب القديم ${escapeHtml(oldId)} اتلغى.`; }
-      catch { editNote = ` تنبيه: مقدرناش نلغي الطلب القديم ${escapeHtml(oldId)} تلقائيًا، كلّم المحل علشان يلغيه.`; }
-    }
     state.cart = {};
     state.cartNotices = [];
     saveCart();
@@ -1500,7 +1517,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     document.getElementById("orderForm").reset();
     statusEl.style.color = "var(--ok)";
     loadMyOrders();
-    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز. احتفظ بالرقم لمتابعة طلبك.${editNote}`;
+    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز. احتفظ بالرقم لمتابعة طلبك.`;
   } catch (err) {
     statusEl.style.color = "var(--danger)";
     if (String(err && err.message) === "SETUP_MISSING") {
@@ -1543,8 +1560,8 @@ document.getElementById("supportForm").addEventListener("submit", async (e) => {
   }
 });
 
-// تعديل الطلب: بنرجّع أصناف الطلب القديم للسلة بالأسعار الحالية، العميل يعدّل براحته، وعند التأكيد
-// بيتعمل طلب جديد بنفس الفحوصات العادية وبعدها الطلب القديم يتلغي.
+// تعديل الطلب في نفس الرقم: بنرجّع أصناف الطلب للسلة بالأسعار الحالية، العميل يعدّل براحته، وعند الحفظ
+// بيتحدّث نفس الطلب (items/bundles/total فقط) والقواعد هي اللي بتتأكد إنه طلبه وإنه لسه قيد التجهيز وإن الأسعار صح.
 function startEditOrder(target, oid) {
   if (Object.keys(state.cart).length && !confirm("السلة فيها منتجات دلوقتي. هتتبدل بمنتجات الطلب اللي بتعدّله. تكمل؟")) return;
   const cart = {}; const skipped = [];
@@ -1572,11 +1589,26 @@ function startEditOrder(target, oid) {
   document.getElementById("custPhone").value = target.customerPhone || target.phone || "";
   document.getElementById("custAddress").value = target.address || "";
   document.getElementById("custNotes").value = target.notes || "";
-  const st = document.getElementById("orderStatus");
-  st.style.color = "var(--navy)";
-  st.textContent = `بتعدّل الطلب ${oid}: احذف أو ضيف أي منتجات، وبعدين اضغط تأكيد الطلب. هيتسجل طلب جديد والطلب القديم هيتلغي. لو مش عايز تعدّل اقفل السلة وسيب الطلب زي ما هو.`;
+  ["custName","custPhone","custAddress","custNotes"].forEach(id => { document.getElementById(id).readOnly = true; });
+  document.querySelector("#orderForm button[type=submit]").textContent = "حفظ تعديل الطلب";
+  showEditBanner();
   openModal("cartModal");
 }
+
+function showEditBanner() {
+  if (!state.editingOrderId) return;
+  const st = document.getElementById("orderStatus");
+  st.style.color = "var(--navy)";
+  st.innerHTML = `بتعدّل الطلب <strong>${escapeHtml(state.editingOrderId)}</strong> (نفس الرقم). احذف أو ضيف أي منتجات، وبعدين اضغط «حفظ تعديل الطلب». الأسعار هي الأسعار الحالية. <a href="#" id="cancelEditLink" style="color:var(--danger);font-weight:800;">إلغاء التعديل</a>`;
+  document.getElementById("cancelEditLink").addEventListener("click", ev => { ev.preventDefault(); cancelEditMode(); });
+}
+function endEditMode() {
+  state.editingOrderId = null;
+  ["custName","custPhone","custAddress","custNotes"].forEach(id => { const el = document.getElementById(id); if (el) el.readOnly = false; });
+  const b = document.querySelector("#orderForm button[type=submit]"); if (b) b.textContent = "تأكيد الطلب";
+  const st = document.getElementById("orderStatus"); if (st) st.innerHTML = "";
+}
+function cancelEditMode() { endEditMode(); state.cart = {}; saveCart(); renderProducts(); renderCartModal(); closeModal("cartModal"); }
 
 function renderTrackedOrderCard(found) {
   const orderKey = String(found._key || found.id || "");
