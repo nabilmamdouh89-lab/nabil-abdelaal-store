@@ -460,6 +460,8 @@
   .search-wrap { position: relative; margin: -30px 0 14px; }
   .search-wrap svg { position:absolute; top:50%; right:18px; transform:translateY(-50%); color:#52525b; pointer-events:none; }
   .search-wrap input { height:56px; border-radius:20px; border:1px solid #fff; background:#fff; padding:0 52px 0 16px; font-size:15px; box-shadow:0 8px 22px rgba(6,21,43,.16); }
+  .old-orders-btn { margin-top: 8px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.08); color: #fde68a; border: 1px solid rgba(251,191,36,.5); font-weight: 800; font-size: 14px; }
+  .old-orders-btn:hover { background: rgba(255,255,255,.14); }
 </style>
 </head>
 <body>
@@ -499,6 +501,7 @@
       <span class="track-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fcd34d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span>
     </div>
     <button id="trackBtn" type="button" class="track-btn">تحديث حالة طلباتي</button>
+    <button id="oldOrdersBtn" type="button" class="old-orders-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>معاملاتي القديمة<span id="oldOrdersCount"></span></span></button>
     <div id="trackResult"></div>
   </section>
   <section class="promo-banner" aria-label="شعارنا الدائم">
@@ -590,6 +593,17 @@
       <button type="submit" class="btn-accent">تأكيد الطلب</button>
     </form>
     <div id="orderStatus" class="status-msg"></div>
+  </div>
+</div>
+
+<!-- نافذة المعاملات القديمة (الطلبات اللي اتسلمت) -->
+<div id="oldOrdersModal" class="modal-backdrop">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>معاملاتي القديمة</h3>
+      <button type="button" class="close-btn" data-close="oldOrdersModal">إغلاق</button>
+    </div>
+    <div id="oldOrdersList"></div>
   </div>
 </div>
 
@@ -1610,6 +1624,15 @@ function endEditMode() {
 }
 function cancelEditMode() { endEditMode(); state.cart = {}; saveCart(); renderProducts(); renderCartModal(); closeModal("cartModal"); }
 
+function renderOldOrders(done) {
+  state.oldOrdersLoaded = true;
+  const box = document.getElementById("oldOrdersList");
+  if (!box) return;
+  box.innerHTML = done.length ? done.map(renderTrackedOrderCard).join("") : `<div class="order-box">مفيش معاملات قديمة لسه.</div>`;
+  const c = document.getElementById("oldOrdersCount");
+  if (c) c.textContent = done.length ? " (" + done.length.toLocaleString("ar-EG") + ")" : "";
+}
+
 function renderTrackedOrderCard(found) {
   const orderKey = String(found._key || found.id || "");
   const statusText = String(found.status || "قيد التجهيز");
@@ -1674,6 +1697,7 @@ async function loadMyOrders() {
   if (ids.length === 0) {
     out.innerHTML = `<div class="order-box">مفيش طلبات متسجلة على الجهاز ده لسه.</div>`;
     state.trackedOrders = [];
+    renderOldOrders([]);
     return;
   }
   out.innerHTML = `<div class="order-box">جاري تحميل طلباتك...</div>`;
@@ -1685,15 +1709,23 @@ async function loadMyOrders() {
     else if (r.status === "rejected") failed++;
   });
   state.trackedOrders = list;
-  let html = list.map(renderTrackedOrderCard).join("");
+  const isDelivered = od => { const t = String(od.status || ""); return !t.includes("ملغ") && ((t.includes("تسليم") && !t.includes("توصيل")) || t.includes("تم")); };
+  const activeOrders = list.filter(od => !isDelivered(od));
+  const doneOrders = list.filter(isDelivered);
+  let html = activeOrders.map(renderTrackedOrderCard).join("");
   if (localStorage.getItem("nabil_identity_reset")) html += `<div class="order-box">ملحوظة: هوية الجهاز اتجددت، فممكن طلبات قديمة متظهرش هنا. ابعت استفسار للمحل برقم الطلب.</div>`;
   if (failed) html += `<div class="order-box" style="color:var(--danger);">تعذر تحميل ${failed} طلب. جرّب تاني بعد شوية.</div>`;
-  if (!html) html = `<div class="order-box">مفيش طلبات ظاهرة. لو طلبك اتحذف أو اتعمل من جهاز تاني، ابعت استفسار للمحل.</div>`;
+  if (!html && !doneOrders.length) html = `<div class="order-box">مفيش طلبات ظاهرة. لو طلبك اتحذف أو اتعمل من جهاز تاني، ابعت استفسار للمحل.</div>`;
   out.innerHTML = html;
   bindTrackedOrderActions();
+  renderOldOrders(doneOrders);
 }
 
 document.getElementById("trackBtn").addEventListener("click", loadMyOrders);
+document.getElementById("oldOrdersBtn").addEventListener("click", async () => {
+  if (!state.oldOrdersLoaded) { try { await loadMyOrders(); } catch {} }
+  openModal("oldOrdersModal");
+});
 
 if (!authEnabled()) document.getElementById("setupBanner").style.display = "block";
 updateCartBadge();
