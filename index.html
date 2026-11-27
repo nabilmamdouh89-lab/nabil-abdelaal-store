@@ -731,6 +731,7 @@ const DEFAULT_CATEGORIES = [
 let state = {
   products: [],
   customCategories: [],
+  editingOrderId: null,
   tickerText: "",
   catIcons: {},
   dailyOffers: [],
@@ -1485,6 +1486,12 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     orderPayload.uid = AUTH.uid;
     await dbReq("PUT", `/orders/${encodeURIComponent(orderId)}.json`, orderPayload);
     addMyOrderId(orderId);
+    let editNote = "";
+    if (state.editingOrderId) {
+      const oldId = state.editingOrderId; state.editingOrderId = null;
+      try { await dbReq("PUT", `/orders/${encodeURIComponent(oldId)}/status.json`, "ملغي بواسطة العميل (تم تعديله)"); editNote = ` الطلب القديم ${escapeHtml(oldId)} اتلغى.`; }
+      catch { editNote = ` تنبيه: مقدرناش نلغي الطلب القديم ${escapeHtml(oldId)} تلقائيًا، كلّم المحل علشان يلغيه.`; }
+    }
     state.cart = {};
     state.cartNotices = [];
     saveCart();
@@ -1493,7 +1500,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     document.getElementById("orderForm").reset();
     statusEl.style.color = "var(--ok)";
     loadMyOrders();
-    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز. احتفظ بالرقم لمتابعة طلبك.`;
+    statusEl.innerHTML = `تم تسجيل طلبك بنجاح! رقم الطلب: <strong>${escapeHtml(orderId)}</strong> — الحالة: قيد التجهيز. احتفظ بالرقم لمتابعة طلبك.${editNote}`;
   } catch (err) {
     statusEl.style.color = "var(--danger)";
     if (String(err && err.message) === "SETUP_MISSING") {
@@ -1536,6 +1543,41 @@ document.getElementById("supportForm").addEventListener("submit", async (e) => {
   }
 });
 
+// تعديل الطلب: بنرجّع أصناف الطلب القديم للسلة بالأسعار الحالية، العميل يعدّل براحته، وعند التأكيد
+// بيتعمل طلب جديد بنفس الفحوصات العادية وبعدها الطلب القديم يتلغي.
+function startEditOrder(target, oid) {
+  if (Object.keys(state.cart).length && !confirm("السلة فيها منتجات دلوقتي. هتتبدل بمنتجات الطلب اللي بتعدّله. تكمل؟")) return;
+  const cart = {}; const skipped = [];
+  const rawItems = target.items && typeof target.items === "object" ? Object.values(target.items) : [];
+  for (const it of rawItems) {
+    const p = state.products.find(pr => pr.id === String(it.id));
+    const qty = Number(it.qty);
+    if (!p || p.available === false || !(qty >= 1)) { skipped.push(String(it.name || "منتج")); continue; }
+    cart[p.id] = { id: p.id, name: p.name, price: p.price, qty: Math.min(qty, Math.min(50, p.maxPerCustomer || 50)) };
+  }
+  const rawBundles = target.bundles && typeof target.bundles === "object" ? Object.values(target.bundles) : [];
+  for (const bd of rawBundles) {
+    const o = state.offersFull.find(x => x.id === String(bd.id));
+    const b = getBundle(o);
+    const qty = Number(bd.qty);
+    if (!o || !b || bundleProblem(o) || !(qty >= 1)) { skipped.push(String(bd.title || "عرض")); continue; }
+    cart["bundle_" + o.id] = { id: "bundle_" + o.id, kind: "bundle", offerId: o.id, name: o.title, price: b.price, qty: Math.min(10, qty),
+      items: Object.fromEntries(b.items.map(it => [it.pid, it.qty])) };
+  }
+  state.cart = cart;
+  state.editingOrderId = oid;
+  state.cartNotices = skipped.length ? [`مش متاحين دلوقتي وتم استبعادهم: ${skipped.join("، ")}`] : [];
+  saveCart(); renderProducts(); renderCartModal();
+  document.getElementById("custName").value = target.customerName || "";
+  document.getElementById("custPhone").value = target.customerPhone || target.phone || "";
+  document.getElementById("custAddress").value = target.address || "";
+  document.getElementById("custNotes").value = target.notes || "";
+  const st = document.getElementById("orderStatus");
+  st.style.color = "var(--navy)";
+  st.textContent = `بتعدّل الطلب ${oid}: احذف أو ضيف أي منتجات، وبعدين اضغط تأكيد الطلب. هيتسجل طلب جديد والطلب القديم هيتلغي. لو مش عايز تعدّل اقفل السلة وسيب الطلب زي ما هو.`;
+  openModal("cartModal");
+}
+
 function renderTrackedOrderCard(found) {
   const orderKey = String(found._key || found.id || "");
   const statusText = String(found.status || "قيد التجهيز");
@@ -1545,7 +1587,7 @@ function renderTrackedOrderCard(found) {
     ? `
       <div class="order-actions">
         <button type="button" class="btn-danger-soft" data-cancel-order="${escapeHtml(orderKey)}">إلغاء الطلب</button>
-        <button type="button" class="btn-primary" data-request-change="${escapeHtml(orderKey)}">طلب تعديل</button>
+        <button type="button" class="btn-primary" data-request-change="${escapeHtml(orderKey)}">تعديل الطلب</button>
       </div>`
     : `<div style="margin-top:8px;font-size:12px;color:var(--muted);">حالة الطلب اتحدّثت من المحل ومينفعش نعدّله أو نلغيه من هنا دلوقتي.</div>`;
   const stl = statusText;
@@ -1573,12 +1615,8 @@ function bindTrackedOrderActions() {
     btn.addEventListener("click", () => {
       const oid = btn.getAttribute("data-request-change");
       const target = state.trackedOrders.find(o => String(o._key) === oid);
-      document.getElementById("supName").value = (target && target.customerName) || "";
-      document.getElementById("supPhone").value = (target && (target.customerPhone || target.phone)) || "";
-      document.getElementById("supMsg").value = `طلب تعديل للطلب رقم ${oid}: `;
-      document.getElementById("supportModalTitle").textContent = "طلب تعديل الطلب";
-      document.getElementById("supportStatus").textContent = "اكتب التعديل المطلوب وهيتواصل معاك المحل.";
-      openModal("supportModal");
+      if (!target || !canCustomerModifyOrder(target.status)) return;
+      startEditOrder(target, oid);
     });
   });
   out.querySelectorAll("[data-cancel-order]").forEach(btn => {
