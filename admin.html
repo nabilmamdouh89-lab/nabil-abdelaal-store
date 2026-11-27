@@ -193,15 +193,23 @@
     <section id="categoriesTab" class="panel" style="display:none;">
       <h2 style="margin-top:0;font-size:17px;">إدارة الأقسام</h2>
       <form id="categoryForm" class="row" style="margin-bottom:12px;">
-        <input id="newCatName" type="text" placeholder="اسم القسم الجديد" style="flex:1;min-width:200px;" required />
+        <input id="newCatName" type="text" placeholder="اسم القسم (جديد أو موجود)" style="flex:1;min-width:200px;" required />
+        <input id="newCatIcon" type="text" maxlength="8" placeholder="أيقونة (اختياري) 🧀" style="width:150px;" />
         <button type="submit" class="btn-accent">إضافة قسم</button>
       </form>
+      <div style="font-size:12px;color:var(--muted);margin:-4px 0 10px;">لإضافة أو تغيير أيقونة قسم موجود: اضغط على اسمه في القائمة، اكتب الأيقونة، واضغط "إضافة قسم". سيب الأيقونة فاضية لو عايز تشيلها.</div>
       <div id="categoriesList" class="row"></div>
     </section>
 
     <!-- تبويب العروض اليومية -->
     <section id="offersTab" class="panel" style="display:none;">
       <h2 style="margin-top:0;font-size:17px;">العروض اليومية</h2>
+      <div class="row" style="margin-bottom:14px;border:1px dashed #b45309;border-radius:10px;padding:10px;background:#fff7e6;">
+        <strong style="flex-basis:100%;color:#78350f;">نص الشريط المتحرك أعلى الصفحة</strong>
+        <input id="tickerTextInput" type="text" maxlength="300" placeholder="اكتب النص اللي يتحرك في الشريط (سيبه فاضي لعرض عناوين العروض)" style="flex:1;min-width:200px;" />
+        <button type="button" id="saveTickerBtn" class="btn-accent">حفظ نص الشريط</button>
+        <div id="tickerStatus" style="flex-basis:100%;font-size:12px;color:var(--muted);">لو سيبته فاضي، الشريط بيعرض عناوين العروض اليومية، ولو مفيش عروض بيعرض الجملة الافتراضية.</div>
+      </div>
       <form id="offerForm" class="row" style="margin-bottom:12px;">
         <input id="offerTitle" type="text" placeholder="عنوان العرض (مثال: عرض زيت 5 لتر)" style="flex:2;min-width:200px;" required />
         <input id="offerPrice" type="text" placeholder="نص السعر أو الخصم للشريط (اختياري)" style="flex:1;min-width:140px;" />
@@ -267,6 +275,7 @@ const DEFAULT_CATEGORIES = ["السلع الاساسيه", "الزيوت وال�
 let adminState = {
   products: [],
   categories: [],
+  catIcons: {},
   orders: [],
   offers: [],
   complaints: [],
@@ -621,8 +630,17 @@ function renderCategorySelect() {
   // بنحافظ على القسم المختار (أو قسم المنتج اللي بيتعدّل) لو لسه موجود.
   const current = sel.value;
   const all = Array.from(new Set([...DEFAULT_CATEGORIES, ...adminState.categories]));
-  sel.innerHTML = all.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  sel.innerHTML = all.map(c => `<option value="${escapeHtml(c)}">${adminState.catIcons[c] ? escapeHtml(adminState.catIcons[c]) + " " : ""}${escapeHtml(c)}</option>`).join("");
   if (current && all.includes(current)) sel.value = current;
+}
+
+// الأقسام بتتخزن كنص عادي، أو {name, icon} لو القسم ليه أيقونة. الأقسام الأساسية بتتخزن بس لو ليها أيقونة.
+function buildCategoriesObj(cats, icons) {
+  const entries = cats.map(n => icons[n] ? { name: n, icon: icons[n] } : n);
+  DEFAULT_CATEGORIES.forEach(n => { if (icons[n]) entries.push({ name: n, icon: icons[n] }); });
+  const obj = {};
+  entries.forEach((e, idx) => { obj["cat_" + idx] = e; });
+  return obj;
 }
 
 function renderCategoriesList() {
@@ -635,19 +653,28 @@ function renderCategoriesList() {
       : `<span style="font-size:11px;color:var(--muted);">أساسي</span>`;
     return `
       <div class="item-card" style="flex-direction:row;align-items:center;gap:10px;">
-        <span style="font-weight:700;">${escapeHtml(cat)}</span>
+        <span data-pick-cat="${escapeHtml(cat)}" style="font-weight:700;cursor:pointer;">${adminState.catIcons[cat] ? escapeHtml(adminState.catIcons[cat]) + " " : ""}${escapeHtml(cat)}</span>
         ${delBtn}
       </div>
     `;
   }).join("");
 
+  container.querySelectorAll("[data-pick-cat]").forEach(sp => {
+    sp.addEventListener("click", () => {
+      const n = sp.getAttribute("data-pick-cat");
+      document.getElementById("newCatName").value = n;
+      document.getElementById("newCatIcon").value = adminState.catIcons[n] || "";
+      document.getElementById("newCatIcon").focus();
+    });
+  });
+
   container.querySelectorAll("[data-del-cat]").forEach(btn => {
     btn.addEventListener("click", async () => {
       const catName = btn.getAttribute("data-del-cat");
       const nextCats = adminState.categories.filter(c => c !== catName);
-      const nextObj = {};
-      nextCats.forEach((c, idx) => { nextObj["cat_" + idx] = c; });
-      await putJson("/categories.json", nextObj);
+      const nextIcons = { ...adminState.catIcons }; delete nextIcons[catName];
+      await putJson("/categories.json", buildCategoriesObj(nextCats, nextIcons));
+      adminState.catIcons = nextIcons;
       adminState.categories = nextCats;
       renderCategorySelect();
       renderCategoriesList();
@@ -658,14 +685,20 @@ function renderCategoriesList() {
 document.getElementById("categoryForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = document.getElementById("newCatName").value.trim();
+  const icon = document.getElementById("newCatIcon").value.trim().slice(0, 8);
   if (!name) return;
-  if (!adminState.categories.includes(name) && !DEFAULT_CATEGORIES.includes(name)) {
-    adminState.categories.push(name);
-    const nextObj = {};
-    adminState.categories.forEach((c, idx) => { nextObj["cat_" + idx] = c; });
-    await putJson("/categories.json", nextObj);
+  const exists = adminState.categories.includes(name) || DEFAULT_CATEGORIES.includes(name);
+  const nextCats = exists ? adminState.categories.slice() : adminState.categories.concat([name]);
+  const nextIcons = { ...adminState.catIcons };
+  if (icon) nextIcons[name] = icon; else delete nextIcons[name];
+  const changed = !exists || (nextIcons[name] || "") !== (adminState.catIcons[name] || "");
+  if (changed) {
+    await putJson("/categories.json", buildCategoriesObj(nextCats, nextIcons));
+    adminState.categories = nextCats;
+    adminState.catIcons = nextIcons;
   }
   document.getElementById("newCatName").value = "";
+  document.getElementById("newCatIcon").value = "";
   renderCategorySelect();
   renderCategoriesList();
 });
@@ -1105,7 +1138,24 @@ function renderSupportAdmin() {
   `).join("");
 }
 
+async function loadTickerAdmin() {
+  try {
+    const v = await fetchJson("/offers/_settings/tickerText.json");
+    const inp = document.getElementById("tickerTextInput");
+    if (document.activeElement !== inp) inp.value = typeof v === "string" ? v : "";
+  } catch {}
+}
+document.getElementById("saveTickerBtn").addEventListener("click", async () => {
+  const st = document.getElementById("tickerStatus");
+  const v = document.getElementById("tickerTextInput").value.trim().slice(0, 300);
+  try {
+    await putJson("/offers/_settings/tickerText.json", v);
+    st.style.color = "var(--ok)"; st.textContent = v ? "تم الحفظ. الشريط هيعرض النص ده." : "تم المسح. الشريط رجع يعرض عناوين العروض.";
+  } catch { st.style.color = "var(--danger)"; st.textContent = "تعذّر الحفظ. صلاحيات قاعدة البيانات رفضت الحفظ."; }
+});
+
 async function loadMinOrderAdmin() {
+  loadTickerAdmin();
   const st = document.getElementById("minOrderStatus");
   try {
     const v = Number(await fetchJson("/offers/_settings/minOrder.json"));
@@ -1157,11 +1207,12 @@ async function loadAllAdminData() {
     }
 
     if (catRaw.status === "fulfilled" && catRaw.value) {
-      if (Array.isArray(catRaw.value)) {
-        adminState.categories = catRaw.value.map(x => typeof x === "string" ? x : x?.name).filter(Boolean);
-      } else if (typeof catRaw.value === "object") {
-        adminState.categories = Object.values(catRaw.value).map(x => typeof x === "string" ? x : x?.name).filter(Boolean);
-      }
+      const catList = Array.isArray(catRaw.value) ? catRaw.value : (typeof catRaw.value === "object" ? Object.values(catRaw.value) : []);
+      const names = catList.map(x => typeof x === "string" ? x : x?.name).filter(Boolean);
+      adminState.categories = names.filter(n => !DEFAULT_CATEGORIES.includes(n));
+      const ic = {};
+      catList.forEach(x => { if (x && typeof x === "object" && x.name && typeof x.icon === "string" && x.icon.trim()) ic[x.name] = x.icon.trim().slice(0, 8); });
+      adminState.catIcons = ic;
     }
 
     if (ordRaw.status === "fulfilled" && ordRaw.value && typeof ordRaw.value === "object") {
