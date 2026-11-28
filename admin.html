@@ -633,12 +633,22 @@ function placeProductFormUnder(card) {
 }
 rememberProductFormHome();
 
+// أي قسم موجود على منتج لازم يظهر في الاختيار والقائمة، وإلا تعديل المنتج يغيّر قسمه بالغلط.
+function knownProductCats() {
+  const out = new Set();
+  (adminState.products || []).forEach(p => { const c = p && p.category; if (c) out.add(String(c)); });
+  return Array.from(out);
+}
+function allCategories() {
+  return Array.from(new Set([...DEFAULT_CATEGORIES, ...adminState.categories, ...knownProductCats()]));
+}
+
 function renderCategorySelect() {
   const sel = document.getElementById("prodCategory");
   // التحديث التلقائي كل 5 ثواني كان بيعيد بناء القائمة ويرجّع الاختيار لأول قسم.
   // بنحافظ على القسم المختار (أو قسم المنتج اللي بيتعدّل) لو لسه موجود.
   const current = sel.value;
-  const all = Array.from(new Set([...DEFAULT_CATEGORIES, ...adminState.categories]));
+  const all = allCategories();
   sel.innerHTML = all.map(c => `<option value="${escapeHtml(c)}">${adminState.catIcons[c] ? escapeHtml(adminState.catIcons[c]) + " " : ""}${escapeHtml(c)}</option>`).join("");
   if (current && all.includes(current)) sel.value = current;
 }
@@ -655,9 +665,9 @@ function buildCategoriesObj(cats, icons) {
 let pickedCat = null;
 function renderCategoriesList() {
   const container = document.getElementById("categoriesList");
-  const all = Array.from(new Set([...DEFAULT_CATEGORIES, ...adminState.categories]));
+  const all = allCategories();
   container.innerHTML = all.map(cat => {
-    const isCustom = adminState.categories.includes(cat);
+    const isCustom = adminState.categories.includes(cat) || !DEFAULT_CATEGORIES.includes(cat);
     const delBtn = isCustom
       ? `<button type="button" class="btn-danger" data-del-cat="${escapeHtml(cat)}" style="padding:5px 10px;font-size:12px;">حذف القسم</button>`
       : `<span style="font-size:11px;color:var(--muted);">أساسي</span>`;
