@@ -126,6 +126,7 @@
       <button type="button" class="btn-outline tab-btn" data-tab="productsTab">المنتجات</button>
       <button type="button" class="btn-outline tab-btn" data-tab="categoriesTab">الأقسام</button>
       <button type="button" class="btn-outline tab-btn" data-tab="offersTab">العروض اليومية</button>
+      <button type="button" class="btn-outline tab-btn" data-tab="reportsTab">التقارير</button>
       <button type="button" class="btn-outline tab-btn" data-tab="supportTab">الشكاوى والاستفسارات</button>
     </div>
 
@@ -206,6 +207,19 @@
       </form>
       <div style="font-size:12px;color:var(--muted);margin:-4px 0 10px;">لإضافة قسم جديد: اكتب اسمه واضغط "إضافة قسم". لتعديل قسم موجود (اسم أو أيقونة): اضغط على اسمه في القائمة، عدّل، واضغط "حفظ التعديل". لو غيّرت الاسم، كل منتجات القسم بتتنقل للاسم الجديد لوحدها.</div>
       <div id="categoriesList" class="row"></div>
+    </section>
+
+    <!-- تبويب التقارير -->
+    <section id="reportsTab" class="panel" style="display:none;">
+      <h2 style="margin-top:0;font-size:17px;">تقرير الطلبات</h2>
+      <div class="row" style="margin-bottom:10px;">
+        <button type="button" id="repDayBtn" class="btn-accent">يومي</button>
+        <button type="button" id="repMonthBtn" class="btn-outline">شهري</button>
+        <input id="repDate" type="date" style="flex:1;min-width:150px;" />
+        <input id="repMonth" type="month" style="flex:1;min-width:150px;display:none;" />
+      </div>
+      <div id="reportBody" style="display:grid;gap:10px;"></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;">التقرير بيتحسب من الطلبات الموجودة حالياً في الأدمن، فأي طلب تمسحه (أو "حذف الطلبات المسلمة") بيختفي من الأرقام. المبيعات من غير الطلبات الملغية، والغير متوفر مخصوم.</div>
     </section>
 
     <!-- تبويب العروض اليومية -->
@@ -540,7 +554,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     const targetTab = btn.getAttribute("data-tab");
-    ["ordersTab", "productsTab", "categoriesTab", "offersTab", "supportTab"].forEach(id => {
+    ["ordersTab", "productsTab", "categoriesTab", "offersTab", "reportsTab", "supportTab"].forEach(id => {
       document.getElementById(id).style.display = id === targetTab ? "block" : "none";
     });
   });
@@ -1354,6 +1368,68 @@ async function loadAdminImages() {
 }
 function adminImgFor(p) { return (p && (adminState.images[p.id] || p.image)) || ""; }
 
+// ===== تقارير الطلبات: قراءة فقط من الطلبات المحملة في الأدمن، من غير أي قراءة جديدة من Firebase =====
+let repMode = "day";
+function repCairoParts(ms) {
+  const f = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
+  return f; // YYYY-MM-DD
+}
+function orderTimeMs(o) {
+  const c = Number(o.createdAt); if (c > 1e12) return c;
+  const t = Number(o.timestamp); if (t > 1e12) return t;
+  return 0;
+}
+function orderIsCancelled(o) { return String(o?.status || "").includes("ملغ"); }
+function renderReports() {
+  const body = document.getElementById("reportBody");
+  if (!body) return;
+  const dEl = document.getElementById("repDate"), mEl = document.getElementById("repMonth");
+  const today = repCairoParts(Date.now());
+  if (!dEl.value) dEl.value = today;
+  if (!mEl.value) mEl.value = today.slice(0, 7);
+  const key = repMode === "day" ? dEl.value : mEl.value;
+  const inRange = adminState.orders.filter(o => { const t = orderTimeMs(o); if (!t) return false; const d = repCairoParts(t); return repMode === "day" ? d === key : d.slice(0, 7) === key; });
+  let sales = 0, deliveredSales = 0, delivered = 0, cancelled = 0, active = 0;
+  const prod = {};
+  inRange.forEach(o => {
+    if (orderIsCancelled(o)) { cancelled++; return; }
+    const tot = orderTotal(o);
+    sales += tot;
+    if (isOrderDelivered(o)) { delivered++; deliveredSales += tot; } else active++;
+    orderItemsList(o).filter(i => !lineIsUnavail(o, "i", i)).forEach(i => {
+      const k = String(i.id || i.name); const q = Number(i.qty) || 0;
+      if (!prod[k]) prod[k] = { name: i.name || k, qty: 0, sum: 0 };
+      prod[k].qty += q; prod[k].sum += q * (Number(i.price) || 0);
+    });
+    orderBundlesList(o).filter(b => !lineIsUnavail(o, "b", b)).forEach(b => {
+      const k = "b_" + String(b.id || b.title); const q = Number(b.qty) || 0;
+      if (!prod[k]) prod[k] = { name: "عرض: " + (b.title || ""), qty: 0, sum: 0 };
+      prod[k].qty += q; prod[k].sum += q * (Number(b.price) || 0);
+    });
+  });
+  const top = Object.values(prod).sort((x, y) => y.qty - x.qty || y.sum - x.sum).slice(0, 10);
+  const fmt = n => (Math.round(n * 100) / 100).toLocaleString("ar-EG");
+  const card = (label, val, color) => `<div style="flex:1;min-width:130px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:12px;color:var(--muted);">${label}</div><div style="font-size:20px;font-weight:800;color:${color || "var(--text)"};">${val}</div></div>`;
+  body.innerHTML = `
+    <div class="row">${card("عدد الطلبات", fmt(inRange.length))}${card("إجمالي المبيعات (جنيه)", fmt(sales), "var(--ok)")}</div>
+    <div class="row">${card("تم التسليم", fmt(delivered), "var(--ok)")}${card("جاري (تجهيز/توصيل)", fmt(active), "var(--warn)")}${card("ملغي", fmt(cancelled), "var(--danger)")}</div>
+    <div style="font-size:13px;color:var(--muted);">مبيعات الطلبات المسلّمة: ${fmt(deliveredSales)} جنيه</div>
+    <div style="font-weight:800;">أكتر المنتجات مبيعاً</div>
+    ${top.length ? top.map((p, i) => `<div style="display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding:6px 0;"><span>${i + 1}. ${escapeHtml(p.name)}</span><span style="white-space:nowrap;">${fmt(p.qty)} قطعة · ${fmt(p.sum)} جنيه</span></div>`).join("") : `<div style="color:var(--muted);">مفيش طلبات في الفترة دي.</div>`}`;
+}
+function setRepMode(m) {
+  repMode = m;
+  document.getElementById("repDayBtn").className = m === "day" ? "btn-accent" : "btn-outline";
+  document.getElementById("repMonthBtn").className = m === "month" ? "btn-accent" : "btn-outline";
+  document.getElementById("repDate").style.display = m === "day" ? "" : "none";
+  document.getElementById("repMonth").style.display = m === "month" ? "" : "none";
+  renderReports();
+}
+document.getElementById("repDayBtn").addEventListener("click", () => setRepMode("day"));
+document.getElementById("repMonthBtn").addEventListener("click", () => setRepMode("month"));
+document.getElementById("repDate").addEventListener("change", renderReports);
+document.getElementById("repMonth").addEventListener("change", renderReports);
+
 async function loadAllAdminData() {
   if (!adminState.imagesLoaded) loadAdminImages();
   loadMinOrderAdmin();
@@ -1417,6 +1493,7 @@ async function loadAllAdminData() {
     renderCategoriesList();
     renderProductsAdmin();
     renderOrdersAdmin();
+    try { renderReports(); } catch {}
     renderOffersAdmin();
     renderSupportAdmin();
   } catch {}
