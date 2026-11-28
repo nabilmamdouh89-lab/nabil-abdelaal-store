@@ -763,7 +763,7 @@ function renderProductsAdmin() {
     listEl.innerHTML = `<div style="color:var(--muted);">لا توجد منتجات بعد.</div>`;
     return;
   }
-  listEl.innerHTML = adminState.products.map(p => {
+  const cardHtml = p => {
     const avail = isProductAvailable(p);
     const statusBadge = avail
       ? `<span class="badge badge-avail">متاح للعميل</span>`
@@ -793,6 +793,29 @@ function renderProductsAdmin() {
         </div>
       </div>
     `;
+  };
+
+  // تجميع المنتجات حسب القسم: كل قسم في كتلة قابلة للفتح والطي، وحالة الفتح بتفضل محفوظة مع التحديث التلقائي.
+  const catOf = p => p.category || "السلع الاساسيه";
+  const catOrder = [];
+  const pushCat = c => { if (c && !catOrder.includes(c)) catOrder.push(c); };
+  DEFAULT_CATEGORIES.forEach(pushCat);
+  adminState.categories.forEach(pushCat);
+  adminState.products.forEach(p => pushCat(catOf(p)));
+  const groups = catOrder
+    .map(c => ({ cat: c, items: adminState.products.filter(p => catOf(p) === c) }))
+    .filter(g => g.items.length > 0);
+  if (!adminState.openCats) adminState.openCats = new Set();
+  listEl.querySelectorAll("details[data-cat-group]").forEach(d => {
+    const c = d.getAttribute("data-cat-group");
+    if (d.open) adminState.openCats.add(c); else adminState.openCats.delete(c);
+  });
+  listEl.innerHTML = groups.map(g => {
+    const openAttr = adminState.openCats.has(g.cat) ? " open" : "";
+    return `<details data-cat-group="${escapeHtml(g.cat)}"${openAttr} style="margin-bottom:10px;border:1px solid var(--border);border-radius:12px;padding:8px;">
+      <summary style="cursor:pointer;font-weight:800;">${escapeHtml(g.cat)} <span style="color:var(--muted);font-weight:600;">(${g.items.length})</span></summary>
+      <div style="margin-top:8px;">${g.items.map(cardHtml).join("")}</div>
+    </details>`;
   }).join("");
 
   if (editingId) {
