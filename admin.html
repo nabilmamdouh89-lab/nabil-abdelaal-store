@@ -277,7 +277,7 @@ async function authUrl(path) {
   const t = await adminToken();
   return `${DB_URL}${path}${path.includes("?") ? "&" : "?"}auth=${encodeURIComponent(t)}`;
 }
-const DEFAULT_CATEGORIES = ["السلع الاساسيه", "الزيوت والسمنات", "معلبات", "منظفات", "ألبان"];
+const DEFAULT_CATEGORIES = ["السلع الاساسيه", "الزيوت والسمنات", "معلبات", "منظفات"];
 
 let adminState = {
   images: {},

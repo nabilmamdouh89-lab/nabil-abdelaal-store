@@ -534,7 +534,7 @@
   <section class="features">
     <div class="feat-card">
       <div class="feat-title">تشكيلة سوبر ماركت متكاملة</div>
-      <div class="feat-sub">سلع يومية، زيوت، سمن، معلبات، منظفات وألبان</div>
+      <div class="feat-sub">سلع يومية، زيوت، سمن، معلبات ومنظفات</div>
     </div>
     <div class="feat-card">
       <div class="feat-title">تحديث فوري للمنتجات</div>
@@ -744,9 +744,28 @@ const DEFAULT_CATEGORIES = [
   "السلع الاساسيه",
   "الزيوت والسمنات",
   "معلبات",
-  "منظفات",
-  "ألبان"
+  "منظفات"
 ];
+
+// ترتيب المنتجات جوه القسم: الأصناف اللي زي بعض تبقى ورا بعض (جبن مع جبن، لبن مع لبن، سمنة مع سمنة...)
+const FAMILY_KEYWORDS = ["جبن","لبن","زبادي","قشطه","زبده","سمنه","زيتون","زيت","نشون","تونه","ساردين","بيفي","مرب","حلاوه","عسل","شاي","بن","نسكافيه","كوفي","بونجورنو","كاكاو","هوت شوكليت","نعناع","كركديه","شيكولاته","صلصه","كاتشب","مايونيز","مسترده","هريسه","صوص","ارز","سكر","مكرونه","شعريه","طحينه","مرقه"];
+function normAr(v) {
+  return String(v || "")
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
+    .replace(/[أإآا]/g, "ا")
+    .replace(/[ىئ]/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function famRank(name) {
+  const n = normAr(name);
+  for (let i = 0; i < FAMILY_KEYWORDS.length; i++) {
+    if (n.indexOf(FAMILY_KEYWORDS[i]) !== -1) return i;
+  }
+  return 999;
+}
 
 let state = {
   products: [],
@@ -1217,7 +1236,7 @@ function renderProducts() {
 
   const catOrder = DEFAULT_CATEGORIES.concat(state.customCategories);
   const rank = c => { const i = catOrder.indexOf(c); return i === -1 ? 999 : i; };
-  filtered.sort((a, b) => rank(a.category) - rank(b.category) || String(a.category).localeCompare(String(b.category), "ar") || a.name.localeCompare(b.name, "ar"));
+  filtered.sort((a, b) => rank(a.category) - rank(b.category) || String(a.category).localeCompare(String(b.category), "ar") || famRank(a.name) - famRank(b.name) || normAr(a.name).localeCompare(normAr(b.name), "ar"));
   let lastCat = null;
   grid.innerHTML = filtered.map(p => {
     let heading = "";
